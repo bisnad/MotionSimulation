@@ -1,0 +1,309 @@
+<robot name="onshape">
+<link name="body">
+<visual>
+<origin xyz="0 0 0" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://body.stl"/>
+</geometry>
+<material name="body_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://body.stl"/>
+</geometry>
+<material name="body_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-5.04395e-17 7.92008e-19 0.0480769" rpy="0 0 0"/>
+<mass value="330.81" />
+<inertia ixx="30.6623" ixy="-1.82959e-16"  ixz="2.51639e-16" iyy="31.5671" iyz="1.52783e-16" izz="61.426" />
+</inertial>
+</link>
+
+<link name="shoulder">
+<visual>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="1.12683e-12 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="3.42587e-13"  ixz="1.32039e-12" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="arm">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.00784877 -0.25 -0.00784877" rpy="0 0 0"/>
+<mass value="38.7358" />
+<inertia ixx="1.08176" ixy="-0.0687172"  ixz="0.00238625" iyy="0.183252" iyz="0.0687172" izz="1.08176" />
+</inertial>
+</link>
+
+<link name="arm_2">
+<visual>
+<origin xyz="2.31841e-18 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="2.31841e-18 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.00784877 -0.25 -0.00784877" rpy="0 0 0"/>
+<mass value="38.7358" />
+<inertia ixx="1.08176" ixy="-0.0687172"  ixz="0.00238625" iyy="0.183252" iyz="0.0687172" izz="1.08176" />
+</inertial>
+</link>
+
+<link name="arm_end">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm_end.stl"/>
+</geometry>
+<material name="arm_end_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm_end.stl"/>
+</geometry>
+<material name="arm_end_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.02712e-18 -0.287263 -0.00657665" rpy="0 0 0"/>
+<mass value="46.2285" />
+<inertia ixx="1.45276" ixy="1.50889e-16"  ixz="-9.80283e-18" iyy="0.220661" iyz="0.0800462" izz="1.45476" />
+</inertial>
+</link>
+
+<joint name="arm6" type="revolute">
+<origin xyz="2.31841e-18 -0.5 0" rpy="-1.3407e-63 1.5708 0" />
+<parent link="arm_2" />
+<child link="arm_end" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="arm3" type="revolute">
+<origin xyz="0 -0.5 -1.08704e-16" rpy="-0 1.5708 0" />
+<parent link="arm" />
+<child link="arm_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="arm1" type="revolute">
+<origin xyz="1.11022e-16 1.11022e-16 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder" />
+<child link="arm" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder1" type="revolute">
+<origin xyz="0.5 -1.11022e-16 0.15" rpy="3.14159 -0 3.14159" />
+<parent link="body" />
+<child link="shoulder" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="shoulder_2">
+<visual>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="1.12683e-12 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="3.42587e-13"  ixz="1.32039e-12" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="arm_3">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.00784877 -0.25 -0.00784877" rpy="0 0 0"/>
+<mass value="38.7358" />
+<inertia ixx="1.08176" ixy="-0.0687172"  ixz="0.00238625" iyy="0.183252" iyz="0.0687172" izz="1.08176" />
+</inertial>
+</link>
+
+<link name="arm_4">
+<visual>
+<origin xyz="2.31841e-18 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="2.31841e-18 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm.stl"/>
+</geometry>
+<material name="arm_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.00784877 -0.25 -0.00784877" rpy="0 0 0"/>
+<mass value="38.7358" />
+<inertia ixx="1.08176" ixy="-0.0687172"  ixz="0.00238625" iyy="0.183252" iyz="0.0687172" izz="1.08176" />
+</inertial>
+</link>
+
+<link name="arm_end_2">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm_end.stl"/>
+</geometry>
+<material name="arm_end_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 1.22465e-16 0" />
+<geometry>
+<mesh filename="package://arm_end.stl"/>
+</geometry>
+<material name="arm_end_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.02712e-18 -0.287263 -0.00657665" rpy="0 0 0"/>
+<mass value="46.2285" />
+<inertia ixx="1.45276" ixy="1.50889e-16"  ixz="-9.80283e-18" iyy="0.220661" iyz="0.0800462" izz="1.45476" />
+</inertial>
+</link>
+
+<joint name="arm5" type="revolute">
+<origin xyz="2.31841e-18 -0.5 0" rpy="-1.3407e-63 1.5708 0" />
+<parent link="arm_4" />
+<child link="arm_end_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="arm4" type="revolute">
+<origin xyz="0 -0.5 2.31841e-18" rpy="-0 1.5708 0" />
+<parent link="arm_3" />
+<child link="arm_4" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="arm2" type="revolute">
+<origin xyz="0 2.77556e-17 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder_2" />
+<child link="arm_3" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder2" type="revolute">
+<origin xyz="-0.5 -8.32667e-17 0.15" rpy="3.14159 -0 3.14159" />
+<parent link="body" />
+<child link="shoulder_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+
+</robot>

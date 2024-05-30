@@ -1,0 +1,659 @@
+<robot name="onshape">
+<link name="part_1">
+<visual>
+<origin xyz="0 0 0" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://part_1.stl"/>
+</geometry>
+<material name="part_1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://part_1.stl"/>
+</geometry>
+<material name="part_1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.01 9.1522e-17 0.0558386" rpy="0 0 0"/>
+<mass value="326.879" />
+<inertia ixx="63.3448" ixy="-1.36742e-15"  ixz="1.39084e-16" iyy="16.3257" iyz="-5.57989e-16" izz="78.8935" />
+</inertial>
+</link>
+
+<link name="shoulder">
+<visual>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.73477e-19 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upperlimb">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.44397e-18 -0.5 -0.04186" rpy="0 0 0"/>
+<mass value="48.0664" />
+<inertia ixx="5.20449" ixy="0"  ixz="0" iyy="0.150452" iyz="0" izz="5.28871" />
+</inertial>
+</link>
+
+<link name="lowerlimb">
+<visual>
+<origin xyz="1.11022e-16 1.525 0" rpy="1.5708 -4.62223e-33 5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="1.11022e-16 1.525 0" rpy="1.5708 -4.62223e-33 5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="7.83238e-17 0.862582 -0.0299475" rpy="0 0 0"/>
+<mass value="82.2783" />
+<inertia ixx="21.2191" ixy="1.47793e-16"  ixz="-2.35989e-15" iyy="0.329118" iyz="-0.584536" izz="21.2929" />
+</inertial>
+</link>
+
+<joint name="lowerlimb1" type="revolute">
+<origin xyz="0 -1 0" rpy="-3.14159 6.12323e-17 2.79253" />
+<parent link="upperlimb" />
+<child link="lowerlimb" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="0.349066" upper="3.14159"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="upperlimb1" type="revolute">
+<origin xyz="5.55112e-17 0 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder" />
+<child link="upperlimb" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.349066" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder1" type="revolute">
+<origin xyz="-0.265 -0.65 0.15" rpy="3.14159 -0 0" />
+<parent link="part_1" />
+<child link="shoulder" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="shoulder_2">
+<visual>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.73477e-19 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upperlimb_2">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.44397e-18 -0.5 -0.04186" rpy="0 0 0"/>
+<mass value="48.0664" />
+<inertia ixx="5.20449" ixy="0"  ixz="0" iyy="0.150452" iyz="0" izz="5.28871" />
+</inertial>
+</link>
+
+<link name="lowerlimb_2">
+<visual>
+<origin xyz="1.11022e-16 1.525 0" rpy="1.5708 -7.70372e-33 -5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="1.11022e-16 1.525 0" rpy="1.5708 -7.70372e-33 -5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="1.15095e-16 0.862582 -0.0299475" rpy="0 0 0"/>
+<mass value="82.2783" />
+<inertia ixx="21.2191" ixy="8.28968e-17"  ixz="1.18199e-15" iyy="0.329118" iyz="-0.584536" izz="21.2929" />
+</inertial>
+</link>
+
+<joint name="lowerlimb2" type="revolute">
+<origin xyz="-5.55112e-17 -1 0" rpy="-3.14159 6.12323e-17 -2.79253" />
+<parent link="upperlimb_2" />
+<child link="lowerlimb_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-3.14159" upper="-0.349066"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="upperlimb2" type="revolute">
+<origin xyz="0 0 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder_2" />
+<child link="upperlimb_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="0.349066"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder2" type="revolute">
+<origin xyz="0.285 -0.65 0.15" rpy="3.14159 -0 0" />
+<parent link="part_1" />
+<child link="shoulder_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="shoulder_3">
+<visual>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.73477e-19 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upperlimb_3">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.44397e-18 -0.5 -0.04186" rpy="0 0 0"/>
+<mass value="48.0664" />
+<inertia ixx="5.20449" ixy="0"  ixz="0" iyy="0.150452" iyz="0" izz="5.28871" />
+</inertial>
+</link>
+
+<link name="lowerlimb_3">
+<visual>
+<origin xyz="1.11022e-16 1.525 -1.2326e-32" rpy="1.5708 -4.62223e-33 5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="1.11022e-16 1.525 -1.2326e-32" rpy="1.5708 -4.62223e-33 5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="7.83238e-17 0.862582 -0.0299475" rpy="0 0 0"/>
+<mass value="82.2783" />
+<inertia ixx="21.2191" ixy="1.47793e-16"  ixz="-2.35989e-15" iyy="0.329118" iyz="-0.584536" izz="21.2929" />
+</inertial>
+</link>
+
+<joint name="lowerlimb3" type="revolute">
+<origin xyz="0 -1 0" rpy="-3.14159 6.12323e-17 2.79253" />
+<parent link="upperlimb_3" />
+<child link="lowerlimb_3" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="0.349066" upper="3.14159"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="upperlimb3" type="revolute">
+<origin xyz="0 6.12323e-18 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder_3" />
+<child link="upperlimb_3" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.349066" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder3" type="revolute">
+<origin xyz="-0.265 -1.25716e-16 0.15" rpy="3.14159 -0 0" />
+<parent link="part_1" />
+<child link="shoulder_3" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="shoulder_4">
+<visual>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.73477e-19 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upperlimb_4">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.44397e-18 -0.5 -0.04186" rpy="0 0 0"/>
+<mass value="48.0664" />
+<inertia ixx="5.20449" ixy="0"  ixz="0" iyy="0.150452" iyz="0" izz="5.28871" />
+</inertial>
+</link>
+
+<link name="lowerlimb_4">
+<visual>
+<origin xyz="1.11022e-16 1.525 6.16298e-33" rpy="1.5708 -7.70372e-33 -5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="1.11022e-16 1.525 6.16298e-33" rpy="1.5708 -7.70372e-33 -5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="1.15095e-16 0.862582 -0.0299475" rpy="0 0 0"/>
+<mass value="82.2783" />
+<inertia ixx="21.2191" ixy="8.28968e-17"  ixz="1.18199e-15" iyy="0.329118" iyz="-0.584536" izz="21.2929" />
+</inertial>
+</link>
+
+<joint name="lowerlimb4" type="revolute">
+<origin xyz="0 -1 3.33693e-33" rpy="-3.14159 6.12323e-17 -2.79253" />
+<parent link="upperlimb_4" />
+<child link="lowerlimb_4" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-3.14159" upper="-0.349066"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="upperlimb4" type="revolute">
+<origin xyz="0 6.12323e-18 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder_4" />
+<child link="upperlimb_4" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="0.349066"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder4" type="revolute">
+<origin xyz="0.285 6.12323e-18 0.15" rpy="3.14159 -0 0" />
+<parent link="part_1" />
+<child link="shoulder_4" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="shoulder_5">
+<visual>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.73477e-19 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upperlimb_5">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.44397e-18 -0.5 -0.04186" rpy="0 0 0"/>
+<mass value="48.0664" />
+<inertia ixx="5.20449" ixy="0"  ixz="0" iyy="0.150452" iyz="0" izz="5.28871" />
+</inertial>
+</link>
+
+<link name="lowerlimb_5">
+<visual>
+<origin xyz="0 1.525 0" rpy="1.5708 -4.62223e-33 5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 1.525 0" rpy="1.5708 -4.62223e-33 5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.26985e-17 0.862582 -0.0299475" rpy="0 0 0"/>
+<mass value="82.2783" />
+<inertia ixx="21.2191" ixy="1.47793e-16"  ixz="-2.35989e-15" iyy="0.329118" iyz="-0.584536" izz="21.2929" />
+</inertial>
+</link>
+
+<joint name="lowerlimb5" type="revolute">
+<origin xyz="0 -1 0" rpy="-3.14159 6.12323e-17 2.79253" />
+<parent link="upperlimb_5" />
+<child link="lowerlimb_5" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="0.349066" upper="3.14159"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="upperlimb5" type="revolute">
+<origin xyz="0 0 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder_5" />
+<child link="upperlimb_5" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.349066" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder5" type="revolute">
+<origin xyz="-0.265 0.65 0.15" rpy="3.14159 -0 0" />
+<parent link="part_1" />
+<child link="shoulder_5" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="shoulder_6">
+<visual>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://shoulder.stl"/>
+</geometry>
+<material name="shoulder_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.73477e-19 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upperlimb_6">
+<visual>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://upperlimb.stl"/>
+</geometry>
+<material name="upperlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.44397e-18 -0.5 -0.04186" rpy="0 0 0"/>
+<mass value="48.0664" />
+<inertia ixx="5.20449" ixy="0"  ixz="0" iyy="0.150452" iyz="0" izz="5.28871" />
+</inertial>
+</link>
+
+<link name="lowerlimb_6">
+<visual>
+<origin xyz="0 1.525 0" rpy="1.5708 -7.70372e-33 -5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 1.525 0" rpy="1.5708 -7.70372e-33 -5.55112e-17" />
+<geometry>
+<mesh filename="package://lowerlimb.stl"/>
+</geometry>
+<material name="lowerlimb_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="4.07313e-18 0.862582 -0.0299475" rpy="0 0 0"/>
+<mass value="82.2783" />
+<inertia ixx="21.2191" ixy="8.28968e-17"  ixz="1.18199e-15" iyy="0.329118" iyz="-0.584536" izz="21.2929" />
+</inertial>
+</link>
+
+<joint name="lowerlimb6" type="revolute">
+<origin xyz="0 -1 0" rpy="-3.14159 6.12323e-17 -2.79253" />
+<parent link="upperlimb_6" />
+<child link="lowerlimb_6" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-3.14159" upper="-0.349066"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="upperlimb6" type="revolute">
+<origin xyz="0 0 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="shoulder_6" />
+<child link="upperlimb_6" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="0.349066"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="shoulder6" type="revolute">
+<origin xyz="0.285 0.65 0.15" rpy="3.14159 -0 0" />
+<parent link="part_1" />
+<child link="shoulder_6" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+
+</robot>

@@ -1,0 +1,729 @@
+"""
+this trains an agent with constant values for dist and effort
+dist in this case is not movement distance but distance between agent and a targe
+replaced te non-feet floor contact with a non-live ending negative reward
+also, there is no conditional control for the agent
+"""
+
+import sys
+import math
+import random
+import numpy as np
+import torch
+import torch.nn as nn
+import pybullet
+import gym
+import time
+import json
+import matplotlib.pyplot as plt
+from common.plot_utils import PlotUtils
+from common.ringbuffer import RingBuffer
+from matplotlib import animation
+from simulation.thing import Thing
+from simulation.utils import Utils
+from custom.agents.custom_agent import CustomAgent
+from analysis.analysis import Analysis
+
+# import agent states
+from custom.states.custom_state import CustomState
+from custom.states.agent_states.body_initial_height_diff_state import BodyInitialHeightDiffState
+from custom.states.agent_states.body_position_state import BodyPositionState
+from custom.states.agent_states.body_rotation_state import BodyRotationState
+from custom.states.agent_states.body_velocity_state import BodyVelocityState
+from custom.states.agent_states.ground_contact_state import GroundContactState
+from custom.states.agent_states.joint_rel_state import JointRelState
+from custom.states.agent_states.body_target_state import BodyTargetState
+
+# import alive states
+from custom.states.alive_states.ground_contact_state import GroundContactState as GroundContactAliveState
+from custom.states.alive_states.max_velocity_state import MaxVelocityState as MaxVelocityState
+
+# import rewards
+from custom.rewards.alive_reward import AliveReward
+from custom.rewards.body_velocity_alignment_reward import BodyVelocityAlignmentReward
+from custom.rewards.feet_collision_reward import FeetCollisionReward
+from custom.rewards.joint_reward import JointReward
+from custom.rewards.move_distance_reward import MoveDistanceReward
+from custom.rewards.impulse_reward import ImpulseReward
+from custom.rewards.weight_effort_reward import WeightEffortReward
+from custom.rewards.time_effort_reward import TimeEffortReward
+from custom.rewards.space_effort_reward import SpaceEffortReward
+from custom.rewards.flow_effort_reward import FlowEffortReward
+from custom.rewards.target_distance_reward import TargetDistanceReward
+from custom.rewards.ground_contact_reward import GroundContactReward
+
+# custom environment
+from custom.envs.custom_environment import CustomEnvironment
+env_name = "Custom_Environment"
+
+
+"""
+configuration
+"""
+
+result_file_path = "training_pytorch/biped_target1.0_ground20.0_run10"
+
+"""
+configuration: agent
+"""
+
+agent_model_file_path = "3d_models/insect_quadruped_v1/body.urdf"
+agent_power = 4.0
+agent_reset_position = [0.0, 0.0, 0.75]
+agent_reset_orientation = [0.0, 0.0, 1.0, 0.0]
+agent_feet_names = ["lowerlimb", "lowerlimb_2", "lowerlimb_3", "lowerlimb_4"]
+agent_allow_self_collisions = True
+
+"""
+configuration: target
+"""
+
+target_min_center_dist = 4.
+target_max_center_dist = 10.
+target_reset_when_agent_close = True
+target_reset_agent_max_distance = 0.5
+
+"""
+configuration: agent costs and rewards
+"""
+
+# alive
+agent_alive_cost = 0.1
+agent_not_alive_cost = -100
+agent_alive_reward_scale = 1.0
+
+# proprioception
+agent_joint_comfort_rotation_range = 0.7
+agent_joint_comfort_force_range = 5000
+agent_joint_max_force = 10000.0
+agent_joint_torque_cost = -0.5 # costs for applying torque to joint (exhaustion)
+agent_joint_limit_cost = -0.2 # costs for joint rotation close to limit (comfort)
+agent_joint_rotation_cost = -0.02 # costs for joint rotation outside of preferred range (comfort)
+agent_joint_force_cost = -0.02 # costs for forces applied to joints along their fixed digrees of freedom (comfort)
+agent_joint_reward_scale = 0.0 # 1.0
+
+# feet with body collision
+agent_feet_collision_cost = -1.0
+agent_feet_collision_reward_scale = 1.0
+
+# non-feet with ground collision
+agent_ground_contact_cost = -100
+
+# body movement direction
+agent_body_misalignment_cost = -1.0
+agent_body_misalignment_reward_scale = 0.0
+
+# movement distance
+agent_move_distance_reward_scale = 0.0
+
+# target distance
+agent_target_distance_reward_scale = 0.0
+
+# weight effort
+agent_weight_effort_target_value = 0.0
+agent_weight_effort_reward_scale = 0.0
+agent_weight_effort_max_value = 200.0
+
+# time effort
+agent_time_effort_target_value = 0.0
+agent_time_effort_reward_scale = 0.0
+agent_time_effort_max_value = 300.0
+
+# space effort
+agent_space_effort_target_value = 0.0
+agent_space_effort_reward_scale = 0.0
+agent_space_effort_max_value = 20.0
+
+# flow effort
+agent_flow_effort_target_value = 0.0
+agent_flow_effort_reward_scale = 0.0
+agent_flow_effort_max_value = 20000.0
+
+"""
+configuration: model
+"""
+
+sac_pi_learning_rate = 1e-4
+sac_q_learning_rate = 1e-4
+sac_replay_size = int(1e6)
+sac_hidden_sizes=(256, 256, 256)
+sac_activation=nn.ReLU
+
+"""
+configuration: training
+"""
+
+epochs=500
+steps_per_epoch=5000
+start_steps=5000 # number of initial steps when actions are taken randomly rather than from sac model
+update_after=1000 # update step after which training of the sac model starts 
+update_every=50 # once training started, number of steps after which training of model is repeated
+max_ep_len=800 # Maximum length of trajectory / episode / rollout.
+
+"""
+configuration: visualization
+"""
+render = False
+
+"""
+configuration: load/save model weights amd replay buffer
+"""
+
+load_epoch = 0
+load_model_weights = False
+load_replay_buffer = False
+save_epoch_interval = 100
+save_model_weights = False
+save_replay_buffer = False
+
+"""
+Read configs
+"""
+
+# config_path
+argCount = len(sys.argv)
+if argCount > 1:
+    config_path = sys.argv[1]
+else:
+    config_path = "{}/config.json".format(result_file_path)    
+
+with open(config_path) as json_file: 
+    config_data = json.load(json_file) 
+
+    # data settings
+    data_config = config_data["data"]
+    result_file_path = data_config["result_file_path"]
+
+    # agent settings 
+    agent_config = config_data["agent"]
+    agent_model_file_path = agent_config["agent_model_file_path"]
+    agent_power = agent_config["agent_power"]
+    agent_reset_position = agent_config["agent_reset_position"]
+    agent_reset_orientation = agent_config["agent_reset_orientation"]
+    agent_feet_names = agent_config["agent_feet_names"]
+    agent_allow_self_collisions = agent_config["agent_allow_self_collisions"]
+    
+    # target settings 
+    target_config = config_data["target"]
+    target_min_center_dist = target_config["target_min_center_dist"]
+    target_max_center_dist = target_config["target_max_center_dist"]
+    target_reset_when_agent_close = target_config["target_reset_when_agent_close"]
+    target_reset_agent_max_distance = target_config["target_reset_agent_max_distance"]
+
+    # agent cost and rewards
+    rewards_config = config_data["reward"]
+    
+    agent_alive_cost = rewards_config["agent_alive_cost"]
+    agent_not_alive_cost = rewards_config["agent_not_alive_cost"]
+    agent_alive_reward_scale = rewards_config["agent_alive_reward_scale"]
+    
+    agent_joint_comfort_rotation_range = rewards_config["agent_joint_comfort_rotation_range"]
+    agent_joint_comfort_force_range = rewards_config["agent_joint_comfort_force_range"]
+    agent_joint_max_force = rewards_config["agent_joint_max_force"]
+    agent_joint_torque_cost = rewards_config["agent_joint_torque_cost"]
+    agent_joint_limit_cost = rewards_config["agent_joint_limit_cost"]
+    agent_joint_rotation_cost = rewards_config["agent_joint_rotation_cost"]
+    agent_joint_force_cost = rewards_config["agent_joint_force_cost"]
+    agent_joint_reward_scale = rewards_config["agent_joint_reward_scale"]
+    
+    agent_feet_collision_cost = rewards_config["agent_feet_collision_cost"]
+    agent_feet_collision_reward_scale = rewards_config["agent_feet_collision_reward_scale"]
+    
+    agent_ground_contact_cost = rewards_config["agent_ground_contact_cost"]
+
+    agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
+    
+    agent_target_distance_reward_scale = rewards_config["agent_target_distance_reward_scale"]
+
+    agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
+    agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
+    agent_weight_effort_max_value = rewards_config["agent_weight_effort_max_value"]
+    
+    agent_time_effort_target_value = rewards_config["agent_time_effort_target_value"]
+    agent_time_effort_reward_scale = rewards_config["agent_time_effort_reward_scale"]
+    agent_time_effort_max_value = rewards_config["agent_time_effort_max_value"]
+    
+    agent_space_effort_target_value = rewards_config["agent_space_effort_target_value"]
+    agent_space_effort_reward_scale = rewards_config["agent_space_effort_reward_scale"]
+    agent_space_effort_max_value = rewards_config["agent_space_effort_max_value"]
+    
+    agent_flow_effort_target_value = rewards_config["agent_flow_effort_target_value"]
+    agent_flow_effort_reward_scale = rewards_config["agent_flow_effort_reward_scale"]
+    agent_flow_effort_max_value = rewards_config["agent_flow_effort_max_value"]
+    
+    # model settings 
+    model_config = config_data["model"]
+    sac_pi_learning_rate = model_config["sac_pi_learning_rate"]
+    sac_q_learning_rate = model_config["sac_q_learning_rate"]
+    sac_replay_size = int(model_config["sac_replay_size"])
+    sac_hidden_sizes= model_config["sac_hidden_sizes"]
+    
+    # training settings 
+    training_config = config_data["training"]
+    epochs = training_config["epochs"]
+    steps_per_epoch = training_config["steps_per_epoch"]
+    start_steps = training_config["start_steps"]
+    update_after = training_config["update_after"]
+    update_every = training_config["update_every"]
+    max_ep_len = training_config["max_ep_len"]
+    
+    # visualisation settings
+    render_config = config_data["visualization"]
+    render = render_config["render"]
+
+    # load and save settings
+    save_config = config_data["save"]
+    load_epoch = save_config["load_epoch"]
+    load_model_weights = save_config["load_model_weights"]
+    load_replay_buffer = save_config["load_replay_buffer"]
+    save_epoch_interval = save_config["save_epoch_interval"]
+    save_model_weights = save_config["save_model_weights"]
+    save_replay_buffer = save_config["save_replay_buffer"]
+
+# initialize random number generators
+seed = 0
+torch.manual_seed(seed)
+np.random.seed(seed)
+
+
+# create environments
+env = gym.make(env_name)
+
+# load agent and ground
+ground = Thing("plane", "3d_models/plane2/plane.urdf")
+target = Thing("target", "3d_models/pillar/pillar.urdf")
+agent = CustomAgent("agent", agent_model_file_path)
+agent.power = agent_power
+
+# add agent and ground to environment
+env.add_ground(ground)
+env.add_target(target)
+env.add_agent(agent)
+
+# specify start position and orientation for agent
+agent.set_reset_position(agent_reset_position)
+agent.set_reset_orientation(agent_reset_orientation)
+
+
+def randomise_target_pos():
+    
+    rand_azim = random.uniform(0.0, math.pi * 2.0)
+    rand_dist = random.uniform(target_min_center_dist, target_max_center_dist)
+    
+    rand_x = rand_dist * math.cos(rand_azim)
+    rand_y = rand_dist * math.sin(rand_azim)
+    rand_z = 0.0
+    
+    target.body.set_position([rand_x, rand_y, rand_z])
+    target.set_reset_position([rand_x, rand_y, rand_z])
+    
+# agent states
+# relative orientations of joints
+jointState = JointRelState()
+agent.add_state(jointState, "joints")
+
+# contact between feet and ground
+groundContactState = GroundContactState()
+groundContactState.part_names = agent_feet_names
+agent.add_state(groundContactState, "groundContact")
+
+# different in body height between episode start and end
+heightDiffState = BodyInitialHeightDiffState()
+agent.add_state(heightDiffState, "heightDiff")
+
+# normalised body positions
+bodyPosState = BodyPositionState()
+bodyPosState.normalise = True
+agent.add_state(bodyPosState, "bodyPos")
+
+# body rotation
+bodyRotState = BodyRotationState()
+agent.add_state(bodyRotState, "bodyRot")
+
+# body velocity
+bodyVelState = BodyVelocityState()
+agent.add_state(bodyVelState, "bodyVel")
+
+# body target state (agent body angle to target state)
+bodyTargetState = BodyTargetState()
+agent.add_state(bodyTargetState, "bodyTarget")
+
+# agent alive state
+"""
+# agent stops being alive when non feet in contact with ground
+aliveState = GroundContactAliveState()
+aliveState.feet_names = agent_feet_names
+agent.add_alive_state(aliveState, "alive")
+"""
+# agent stops being alive when its root link moves too fast
+aliveState2 = MaxVelocityState()
+aliveState2.max_linear_speed = 10.0
+aliveState2.max_angular_speed = 100.0
+agent.add_alive_state(aliveState2, "alive2")
+
+# specify rewards
+
+# rewards for training environment
+
+aliveReward = AliveReward()
+aliveReward.alive_value = agent_alive_cost
+aliveReward.not_alive_value = agent_not_alive_cost
+aliveReward.reward_scale = agent_alive_reward_scale
+
+jointReward = JointReward()
+jointReward.comfort_rotation_range = agent_joint_comfort_rotation_range
+jointReward.comfort_force_range = agent_joint_comfort_force_range
+jointReward.max_force = agent_joint_max_force
+jointReward.torque_cost = agent_joint_torque_cost
+jointReward.limit_cost = agent_joint_limit_cost
+jointReward.rotation_cost = agent_joint_rotation_cost
+jointReward.force_cost = agent_joint_force_cost
+jointReward.reward_scale = agent_joint_reward_scale
+
+feetCollisionReward = FeetCollisionReward()
+feetCollisionReward.feet_names = agent_feet_names
+feetCollisionReward.feet_collision_cost = agent_feet_collision_cost
+feetCollisionReward.reward_scale = agent_feet_collision_reward_scale
+
+groundContactReward = GroundContactReward()
+groundContactReward.feet_names = agent_feet_names
+groundContactReward.ground_collision_cost = agent_ground_contact_cost
+
+bodyVelocityAlignmentReward = BodyVelocityAlignmentReward()
+bodyVelocityAlignmentReward.misalignment_cost = agent_body_misalignment_cost
+bodyVelocityAlignmentReward.reward_scale = agent_body_misalignment_reward_scale
+
+moveDistanceReward = MoveDistanceReward()
+moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
+
+targetDistanceReward = TargetDistanceReward()
+targetDistanceReward.reward_scale  = agent_target_distance_reward_scale
+
+weightEffortReward = WeightEffortReward()
+weightEffortReward.reward_scale = agent_weight_effort_reward_scale
+weightEffortReward.target_value = agent_weight_effort_target_value
+weightEffortReward.max_value = agent_weight_effort_max_value
+
+timeEffortReward = TimeEffortReward()
+timeEffortReward.reward_scale = agent_time_effort_reward_scale
+timeEffortReward.target_value = agent_time_effort_target_value
+timeEffortReward.max_value = agent_time_effort_max_value
+
+spaceEffortReward = SpaceEffortReward()
+spaceEffortReward.reward_scale = agent_space_effort_reward_scale
+spaceEffortReward.target_value = agent_space_effort_target_value
+spaceEffortReward.max_value = agent_space_effort_max_value
+
+flowEffortReward = FlowEffortReward()
+flowEffortReward.reward_scale = agent_flow_effort_reward_scale
+flowEffortReward.target_value = agent_flow_effort_target_value
+flowEffortReward.max_value = agent_flow_effort_max_value
+
+env.add_reward(aliveReward, "alive")
+env.add_reward(jointReward, "joint")
+env.add_reward(feetCollisionReward, "feet")
+env.add_reward(groundContactReward, "ground")
+env.add_reward(bodyVelocityAlignmentReward, "vel_align")
+env.add_reward(moveDistanceReward, "move_dist")
+env.add_reward(targetDistanceReward, "target_dist")
+env.add_reward(weightEffortReward, "weight_effort")
+env.add_reward(timeEffortReward, "time_effort")
+env.add_reward(spaceEffortReward, "space_effort")
+env.add_reward(flowEffortReward, "flow_effort")
+
+# reset environments which initialises environment information
+env.setDisplay(render)
+_ = env.reset()
+
+# agent self collisions
+if agent_allow_self_collisions == False:
+    agent.body.deactivate_self_collisions()
+
+# add texture to ground
+textureId = env.physics.loadTexture("textures/ground_grid2.png")
+env.physics.changeVisualShape(env.ground.body.id, -1, -1, textureId)
+
+# setup reinforcement learning model
+env_observation_space = env.observation_space
+env_action_space = env.action_space
+
+env_observation_limits = np.stack( [env_observation_space.low, env_observation_space.high], axis=1)
+env_action_limits = np.stack( [env_action_space.low, env_action_space.high], axis=1)
+
+# reinforcement learning model
+from learning.sac import SAC
+
+# create SAC Model
+sac = SAC(env_observation_limits, env_action_limits, sac_replay_size, sac_hidden_sizes, sac_activation, sac_pi_learning_rate, sac_q_learning_rate)
+
+# load model weights and replay buffer
+if load_model_weights:
+    sac.load_weights(result_file_path, load_epoch)
+
+if load_replay_buffer:
+    sac.load_replay_buffer(result_file_path, load_epoch)
+
+# output gym render frames as gif
+def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
+
+    #Mess with this to change frame size
+    plt.figure(figsize=(frames[0].shape[1] / 72.0, frames[0].shape[0] / 72.0), dpi=72)
+    #plt.figure(figsize=(frames[0].shape[1] / 18.0, frames[0].shape[0] / 18.0 ), dpi=72)
+
+    patch = plt.imshow(frames[0])
+    plt.axis('off')
+
+    def animate(i):
+        patch.set_data(frames[i])
+
+    anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval=50)
+    anim.save(path + filename, writer='pillow', fps=60)
+
+# output pillow images as gif
+def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
+
+    #Mess with this to change frame size
+    plt.figure(figsize=(images[0].width / 72.0, images[0].height / 72.0), dpi=72)
+    #plt.figure(figsize=(frames[0].shape[1] / 18.0, frames[0].shape[0] / 18.0 ), dpi=72)
+
+    patch = plt.imshow(images[0])
+    plt.axis('off')
+
+    def animate(i):
+        patch.set_data(images[i])
+
+    anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(images), interval=50)
+    anim.save(path + filename, writer='pillow', fps=60)
+
+def export_episode(env, sim_file, reward_file, value_file):
+    
+    episode_rewards = {}
+    episode_values = {}
+    
+    for reward_name in env.reward_names:
+        episode_rewards[reward_name] = []
+        episode_values[reward_name] = []
+    
+    sim_images = []
+    o, d, ep_ret, ep_len = env.reset(), False, 0, 0
+        
+    while not(d or (ep_len == max_ep_len)):
+            
+        # Until start_steps have elapsed, randomly sample actions
+        # from a uniform distribution for better exploration. Afterwards, 
+        # use the learned policy. 
+        a = sac.get_action(np.expand_dims(o, 0))
+        a = np.squeeze(a, 0)
+
+        # Step the env
+        o2, r, d, _ = env.step(a)
+        ep_ret += r
+        ep_len += 1
+        
+        for reward, reward_name in zip(env.rewards, env.reward_names):
+            
+            #print("reward ", reward_name, " value ", reward.value)
+            
+            episode_rewards[reward_name].append(reward.reward)
+            episode_values[reward_name].append(reward.value)
+        
+        env.camera.look_at(env.agent.body.get_position());
+            
+        sim_images.append(env.render(mode="rgb_array"))
+        
+        # Ignore the "done" signal if it comes from hitting the time
+        # horizon (that is, when it's an artificial terminal signal
+        # that isn't based on the agent's state)
+        #d = False if ep_len==max_ep_len else d
+    
+        # Super critical, easy to overlook step: make sure to update 
+        # most recent observation!
+        o = o2
+        
+    
+    save_frames_as_gif(sim_images, filename=sim_file + ".gif") 
+    
+    plot_labels = list(episode_rewards.keys())
+    
+    plot_x = np.arange(len(episode_values["alive"]))
+    plot_rewards_y = np.array(list(episode_rewards.values()))
+    plot_rewards_y = plot_rewards_y[:, :-1] # drop last reward
+    plot_values_y = np.array(list(episode_values.values()))
+    plot_values_y = plot_values_y[:, :-1] # drop last value
+    
+    reward_images = PlotUtils.create_plot_anim(plot_x, plot_rewards_y, plot_labels, 15, 5)
+    save_images_as_gif(reward_images, filename=reward_file + ".gif") 
+    #reward_images[0].save(reward_file + ".gif", save_all=True, append_images=reward_images[1:])
+    PlotUtils.save_data_as_csv(plot_rewards_y, plot_labels, reward_file + ".csv")
+    
+    value_images = PlotUtils.create_plot_anim(plot_x, plot_values_y, plot_labels, 15, 5)
+    save_images_as_gif(value_images, filename=value_file + ".gif") 
+    #value_images[0].save(value_file + ".gif", save_all=True, append_images=value_images[1:])
+    PlotUtils.save_data_as_csv(plot_values_y, plot_labels, value_file + ".csv")
+
+
+def train_agent(epochs, steps_per_epoch, render):
+
+    episode_counter = 0    
+    
+    # store rewards for current episode
+    ep_reward = [0.0] * (len(env.rewards) + 1)
+    
+    # store reward history
+    reward_history = {}
+    
+    # initialise stored rewards
+    reward_history["length"] = []
+    reward_history["total"] = []
+    for reward_name in env.reward_names:
+        reward_history[reward_name] = []
+
+    # To store reward history of each episode
+    ep_reward_list = []
+    
+    # To store average reward history of last few episodes
+    avg_reward_list = []    
+
+    # Prepare for interaction with environment
+    total_steps = steps_per_epoch * epochs
+    start_time = time.time()
+    
+    """
+    if render:
+        env.render() # call this before env.reset, if you want a window showing the environment
+    """
+    
+    randomise_target_pos()
+    o, ep_ret, ep_len = env.reset(), 0, 0
+    
+    # Main loop: collect experience in env and update/log each epoch
+    for t in range(total_steps):
+        
+        # Until start_steps have elapsed, randomly sample actions
+        # from a uniform distribution for better exploration. Afterwards, 
+        # use the learned policy. 
+        if t > start_steps or load_replay_buffer == True:
+            a = sac.get_action(np.expand_dims(o, 0))
+            a = np.squeeze(a, 0)
+        else:
+            a = env.action_space.sample()
+    
+        # Step the env
+        o2, r, d, _ = env.step(a)
+        ep_ret += r
+        ep_len += 1
+        
+        ep_reward[0] += r
+        for rI, reward in enumerate(env.rewards):
+            ep_reward[rI+1] += reward.reward
+            
+        # check if target position needs to be reset
+        if target_reset_when_agent_close == True:
+            agent_pos = Utils.average_body_position(agent)
+            target_pos = Utils.average_body_position(target)
+            target_dist = np.linalg.norm([target_pos[1] - agent_pos[1], target_pos[0] - agent_pos[0]])
+            
+            #print("agent_pos ", agent_pos, " target_pos ", target_pos, " target_dist ", target_dist, " target_reset_agent_max_distance ", target_reset_agent_max_distance )
+            
+            if target_dist < target_reset_agent_max_distance:
+                
+                #print("randomise_target_pos")
+                
+                randomise_target_pos()
+        
+        if render:
+            env.render(mode="human")
+    
+        # Ignore the "done" signal if it comes from hitting the time
+        # horizon (that is, when it's an artificial terminal signal
+        # that isn't based on the agent's state)
+        d = False if ep_len==max_ep_len else d
+    
+        # Store experience to replay buffer
+        sac.store_experience(o, a, r, o2, d)
+    
+        # Super critical, easy to overlook step: make sure to update 
+        # most recent observation!
+        o = o2
+        
+        # debug
+        #print("weightEffortReward value ", weightEffortReward.value, " reward ", weightEffortReward.reward)
+    
+        # End of trajectory handling
+        if d or (ep_len == max_ep_len):
+            episode_counter += 1
+            
+            avg_reward = np.mean(ep_reward_list[-40:])
+            
+            ep_reward_list.append(ep_ret)
+            avg_reward_list.append(avg_reward)
+            
+            # store final episode rewards
+            reward_history["length"].append(ep_len)
+            reward_history["total"].append(ep_reward[0])
+            for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
+                reward_history[reward_name].append(ep_reward[rI+1])
+            # reset episode rewards
+            ep_reward = [0.0] * (len(env.rewards) + 1)
+
+            epoch = (t+1) // steps_per_epoch
+            epoch += load_epoch
+            #print("Episode: {} Length: {} Walk Dist: {} Reward: Current {} Avg {}".format(episode_counter, ep_len, env.agent.walk_dist, ep_ret, avg_reward))
+            print("Epoch {} Episode: {} Length: {} Reward: Current {} Avg {}".format(epoch, episode_counter, ep_len, ep_ret, avg_reward))
+            
+            # debug
+            # print("target dist: ", env.agent.walk_target_dist) 
+            
+            #print("er ", ep_ret, " el ", ep_len, " a ", a)
+            randomise_target_pos()
+            o, ep_ret, ep_len = env.reset(), 0, 0
+            
+                
+        # Update handling
+        if t >= update_after and t % update_every == 0:
+            sac.replay_experience()
+
+    
+        # End of epoch handling
+        if (t+1) % steps_per_epoch == 0:
+            epoch = (t+1) // steps_per_epoch
+            epoch += load_epoch
+            
+            if epoch % save_epoch_interval == 0:
+                
+                if save_model_weights:
+                    sac.save_weights(result_file_path, epoch=epoch)
+                if save_replay_buffer:
+                    sac.save_replay_buffer(result_file_path, epoch=epoch)
+                            
+    return reward_history
+    #return avg_reward_list, ep_reward_list
+
+# train agent
+reward_history = train_agent(epochs, steps_per_epoch, False)
+
+PlotUtils.save_loss_as_csv(reward_history, result_file_path + "/reward_history_{}.csv".format(epochs))
+sac.save_weights(result_file_path, epoch=epochs)
+sac.save_replay_buffer(result_file_path, epoch=epochs)
+#avg_reward, ep_reward = train_agent(epochs, steps_per_epoch, True)
+
+"""
+epochs=50
+start_steps = 0
+
+# env.sim_sub_steps = 20
+# env.sim_time_step = 1.0 / (env.sim_sub_steps * 60)
+# env.sim_solver_iterations = 500
+# env.physics.setPhysicsEngineParameter(fixedTimeStep=env.sim_time_step * env.sim_sub_steps, numSolverIterations=env.sim_solver_iterations, numSubSteps=env.sim_sub_steps)
+
+
+
+epochs = 500
+
+sac.save_weights(result_file_path, epoch=epoch)
+sac.save_replay_buffer(result_file_path, epoch=epoch)
+                
+for export_index in range(episode_export_count):
+    export_episode(env, "{}/sim_{}_{}".format(result_file_path, epochs, export_index), "{}/reward_{}_{}".format(result_file_path, epochs, export_index), "{}/value_{}_{}".format(result_file_path, epochs, export_index))
+
+"""

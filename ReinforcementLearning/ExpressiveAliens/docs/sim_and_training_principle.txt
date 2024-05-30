@@ -1,0 +1,89 @@
+
+
+>>>> update using replay buffer:
+
+>> compute loss for q networks
+
+>> compute loss for pi networks
+
+
+>> update target networks
+
+
+>>>> compute loss for q networks
+
+from replay buffer:
+o_t1, a_t1, r_t1, o_t2, d
+
+# get action values for time 1
+o_t1 & a_t1 -> q1n -> q1_t1
+o_t1 & a_t1 -> q2n -> q2_t1
+
+# get action for time 2
+o_t2 -> pn -> a_t2
+
+# get action values for time 2
+o_t2, a_t2 -> p1tn -> q1t_t2
+o_t2, a_t2 -> p2tn -> q2t_t2
+
+# get ´minimum action value to maximise entropy
+qt_t2 = min(q1t_t2, q2t_t2)
+
+# update q-value network parameters
+
+# update target q-value network parameters 
+
+>>>> compute loss for pi networks
+
+from reply buffer:
+o_t1
+
+# get action for time 1
+o_t1 -> pn -> a_t1
+
+# get action values for time 1
+o_t1 & a_t1 -> q1n -> q1_t1 
+o_t1 & a_t1 -> q2n -> q2_t1 
+
+# get minimum action value to maximise entropy
+q_t1 = min(q1_t1, q2_t1)
+
+# update policy network parameters
+
+# update target policy network parameters
+
+
+
+
+>>>> sim run
+
+# get action
+a = sac.get_action(np.expand_dims(o, 0))
+
+# step environment
+o2, r, d, _ = env.step(a)
+
+# Store experience to replay buffer
+sac.store_experience(o, a, r, o2, d)
+
+
+>> inference
+
+# get action
+a_t1 = sac.get_action(np.expand_dims(o_t1, 0)) # using policy network
+
+# step environment
+o_t2, r_t1, d_t1, _ = env.step(a_1)
+
+# Store experience to replay buffer
+sac.store_experience(o_t1, a_t1, r_t1, o_t2, d_t1)
+
+
+>> training, train based on reply buffer
+
+sac.replay_experience()
+
+
+
+
+ot1, at1, rt1, ot2, dt1 -> reply buffer
