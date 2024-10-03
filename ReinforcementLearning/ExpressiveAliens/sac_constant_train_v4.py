@@ -1,6 +1,6 @@
 """
 this trains an agent with constant values for dist and effort
-dist in this case is not movement distance but distance between agent and a targe
+dist in this case is not movement distance but distance between agent and a target
 replaced te non-feet floor contact with a non-live ending negative reward
 also, there is no conditional control for the agent
 """

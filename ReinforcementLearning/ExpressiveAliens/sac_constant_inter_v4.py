@@ -62,13 +62,16 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "training_pytorch/biped_target1.0_ground20.0_run10"
-#result_file_path = "training_pytorch/biped_target0.6_ground3.0_flow0.0_run13"
-#result_file_path = "training_pytorch/biped_target0.6_ground3.0_flow1.0_run13"
-#result_file_path = "training_pytorch/biped_target0.6_ground3.0_space0.0_run13"
-#result_file_path = "training_pytorch/biped_target0.6_ground3.0_space1.0_run13"
-#result_file_path = "training_pytorch/biped_target0.6_ground3.0_weight0.0_run13"
-#result_file_path = "training_pytorch/biped_target0.6_ground3.0_weight1.0_run13"
+#result_file_path = "results/biped_target1.0_ground20.0_run10"
+#result_file_path = "results/biped_target2.0_ground20.0_run10"
+#result_file_path = "results/biped_target0.6_ground3.0_flow0.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_flow1.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_space0.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_space1.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_weight0.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_weight1.0_run13"
+#result_file_path = "results/snake2_target2.0_dist2.0_run11"
+result_file_path = "results/snake2_target4.0_run13"
 
 """
 configuration frame rate
@@ -317,7 +320,13 @@ env.add_agent(agent)
 agent.set_reset_position(agent_reset_position)
 agent.set_reset_orientation(agent_reset_orientation)
 
+target_pos = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+target_pos_changed = True
+
 def randomise_target_pos():
+    
+    global target_pos
+    global target_pos_changed
     
     rand_azim = random.uniform(0.0, math.pi * 2.0)
     rand_dist = random.uniform(target_min_center_dist, target_max_center_dist)
@@ -326,8 +335,14 @@ def randomise_target_pos():
     rand_y = rand_dist * math.sin(rand_azim)
     rand_z = 0.0
     
-    target.body.set_position([rand_x, rand_y, rand_z])
-    target.set_reset_position([rand_x, rand_y, rand_z])
+    target_pos[0] = rand_x
+    target_pos[1] = rand_y
+    target_pos[2] = rand_z
+    
+    target_pos_changed = True
+    
+    #target.body.set_position([rand_x, rand_y, rand_z])
+    #target.set_reset_position([rand_x, rand_y, rand_z])
 
 # agent states
 # relative orientations of joints
@@ -441,15 +456,20 @@ env.add_reward(flowEffortReward, "flow_effort")
 # osc setup
 
 def osc_set_target_position(address, pos_x, pos_y):
+    
+    global target_pos_changed
 
     #pos_x = args[0]
     #pos_y = args[1]
     pos_z = 0.0
-    
-    target.body.set_position([pos_x, pos_y, pos_z])
-    target.set_reset_position([pos_x, pos_y, pos_z])
 
-    print("osc_set_target_position x ", pos_x, " y ", pos_y)
+    target_pos[0] = pos_x
+    target_pos[1] = pos_y
+    target_pos[2] = pos_z
+    target_pos_changed = True
+    
+
+    #print("osc_set_target_position x ", pos_x, " y ", pos_y)
 
 osc_handler = dispatcher.Dispatcher()
 osc_handler.map("/target/position", osc_set_target_position)
@@ -526,9 +546,21 @@ def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
     
 def run_episode(env):
     
+    global target_pos_changed
+    
     o, d, ep_ret, ep_len = env.reset(), False, 0, 0
         
     while not(d): # never ending episode (unless agent dies)
+    
+        if target_pos_changed == True:
+            
+            target.body.set_position(target_pos)
+            target.set_reset_position(target_pos)
+            
+            #print("target_pos ", target_pos)
+            
+            target_pos_changed = False
+                                    
 
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
