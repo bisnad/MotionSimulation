@@ -1,0 +1,7 @@
+ofxAssimpModelLoader
+ofxDabBase
+ofxDabMath
+ofxDabOsc
+ofxImGui
+ofxJSON
+ofxXmlSettings

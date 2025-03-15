@@ -1,0 +1,89 @@
+{
+	"pattrstorage" : 	{
+		"name" : "u845000342",
+		"slots" : 		{
+			"1" : 			{
+				"id" : 1,
+				"data" : 				{
+					"staccato_active_interest" : [ 0 ],
+					"staccato_appInterval" : [ 1.0 ],
+					"staccato_appInterval_interest" : [ 0 ],
+					"staccato_appInterval_max" : [ 5000.0 ],
+					"staccato_appInterval_min" : [ 1.0 ],
+					"staccato_changeInterval" : [ 1500.0 ],
+					"staccato_changeInterval_interest" : [ 0 ],
+					"staccato_changeInterval_max" : [ 5000.0 ],
+					"staccato_changeInterval_min" : [ 1.0 ],
+					"staccato_maxTarget_interest" : [ 0 ],
+					"staccato_maxTarget_x" : [ 0.0 ],
+					"staccato_maxTarget_x_max" : [ 1.0 ],
+					"staccato_maxTarget_x_min" : [ -1.0 ],
+					"staccato_maxTarget_y" : [ 0.0 ],
+					"staccato_maxTarget_y_max" : [ 1.0 ],
+					"staccato_maxTarget_y_min" : [ -1.0 ],
+					"staccato_maxTarget_z" : [ 1.4 ],
+					"staccato_maxTarget_z_max" : [ 1.4 ],
+					"staccato_maxTarget_z_min" : [ -1.4 ],
+					"staccato_minTarget_interest" : [ 0 ],
+					"staccato_minTarget_x" : [ 0.0 ],
+					"staccato_minTarget_x_max" : [ 1.0 ],
+					"staccato_minTarget_x_min" : [ -1.0 ],
+					"staccato_minTarget_y" : [ 0.0 ],
+					"staccato_minTarget_y_max" : [ 1.0 ],
+					"staccato_minTarget_ymin" : [ -1.0 ],
+					"staccato_minTarget_z" : [ -1.4 ],
+					"staccato_minTarget_z_max" : [ 1.4 ],
+					"staccato_minTarget_z_min" : [ -1.4 ],
+					"staccato_speed" : [ 0.25 ],
+					"staccato_speed_interest" : [ 0 ],
+					"staccato_speed_max" : [ 2.8 ],
+					"staccato_speed_min" : [ 0.0 ]
+				}
+
+			}
+,
+			"10" : 			{
+				"id" : 10,
+				"data" : 				{
+					"staccato_active_interest" : [  ],
+					"staccato_appInterval" : [  ],
+					"staccato_appInterval_interest" : [  ],
+					"staccato_appInterval_max" : [  ],
+					"staccato_appInterval_min" : [  ],
+					"staccato_changeInterval" : [  ],
+					"staccato_changeInterval_interest" : [  ],
+					"staccato_changeInterval_max" : [  ],
+					"staccato_changeInterval_min" : [  ],
+					"staccato_maxTarget_interest" : [  ],
+					"staccato_maxTarget_x" : [  ],
+					"staccato_maxTarget_x_max" : [  ],
+					"staccato_maxTarget_x_min" : [  ],
+					"staccato_maxTarget_y" : [  ],
+					"staccato_maxTarget_y_max" : [  ],
+					"staccato_maxTarget_y_min" : [  ],
+					"staccato_maxTarget_z" : [  ],
+					"staccato_maxTarget_z_max" : [  ],
+					"staccato_maxTarget_z_min" : [  ],
+					"staccato_minTarget_interest" : [  ],
+					"staccato_minTarget_x" : [  ],
+					"staccato_minTarget_x_max" : [  ],
+					"staccato_minTarget_x_min" : [  ],
+					"staccato_minTarget_y" : [  ],
+					"staccato_minTarget_y_max" : [  ],
+					"staccato_minTarget_ymin" : [  ],
+					"staccato_minTarget_z" : [  ],
+					"staccato_minTarget_z_max" : [  ],
+					"staccato_minTarget_z_min" : [  ],
+					"staccato_speed" : [  ],
+					"staccato_speed_interest" : [  ],
+					"staccato_speed_max" : [  ],
+					"staccato_speed_min" : [  ]
+				}
+
+			}
+
+		}
+
+	}
+
+}

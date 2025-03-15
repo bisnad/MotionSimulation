@@ -1,0 +1,11 @@
+RandomForceBehavior Parameters
+
+active: <bool> 
+minDir: <float, 3> (Max: RandomForce_minDir_x, RandomForce_minDir_y, RandomForce_minDir_z)
+maxDir: <float, 3> (Max: RandomForce_maxDir_x, RandomForce_maxDir_y, RandomForce_maxDir_z)
+minAmp: float (Max: RandomForce_minAmp)
+maxAmp: float (Max: RandomForce_maxAmp)
+appInterval: float (Max: RandomForce_appInterval)
+randInterval: float (Max: RandomForce_changeInterval)
+
+

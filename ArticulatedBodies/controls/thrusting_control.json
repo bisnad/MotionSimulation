@@ -1,0 +1,95 @@
+{
+	"pattrstorage" : 	{
+		"name" : "u845000342",
+		"slots" : 		{
+			"1" : 			{
+				"id" : 1,
+				"data" : 				{
+					"motorMaxAngularForce_Z" : [ 100.0 ],
+					"motorMaxAngularForce_Z_max" : [ 100.0 ],
+					"motorMaxAngularForce_Z_min" : [ 0.0 ],
+					"thrusting_active_interest" : [ 0 ],
+					"thrusting_appInterval" : [ 1.0 ],
+					"thrusting_appInterval_interest" : [ 0 ],
+					"thrusting_appInterval_max" : [ 5000.0 ],
+					"thrusting_appInterval_min" : [ 1.0 ],
+					"thrusting_changeInterval" : [ 1500.0 ],
+					"thrusting_changeInterval_interest" : [ 0 ],
+					"thrusting_changeInterval_max" : [ 5000.0 ],
+					"thrusting_changeInterval_min" : [ 0.0 ],
+					"thrusting_maxTarget_interest" : [ 0 ],
+					"thrusting_maxTarget_x" : [ 0.0 ],
+					"thrusting_maxTarget_x_max" : [ 1.0 ],
+					"thrusting_maxTarget_x_min" : [ -1.0 ],
+					"thrusting_maxTarget_y" : [ 0.0 ],
+					"thrusting_maxTarget_y_max" : [ 1.0 ],
+					"thrusting_maxTarget_y_min" : [ -1.0 ],
+					"thrusting_maxTarget_z" : [ 1.4 ],
+					"thrusting_maxTarget_z_max" : [ 1.4 ],
+					"thrusting_maxTarget_z_min" : [ -1.4 ],
+					"thrusting_minTarget_interest" : [ 0 ],
+					"thrusting_minTarget_x" : [ 0.0 ],
+					"thrusting_minTarget_x_max" : [ 1.0 ],
+					"thrusting_minTarget_x_min" : [ -1.0 ],
+					"thrusting_minTarget_y" : [ 0.0 ],
+					"thrusting_minTarget_y_max" : [ 1.0 ],
+					"thrusting_minTarget_ymin" : [ -1.0 ],
+					"thrusting_minTarget_z" : [ -1.4 ],
+					"thrusting_minTarget_z_max" : [ 1.4 ],
+					"thrusting_minTarget_z_min" : [ -1.4 ],
+					"thrusting_speed" : [ 2.8 ],
+					"thrusting_speed_interest" : [ 0 ],
+					"thrusting_speed_max" : [ 2.8 ],
+					"thrusting_speed_min" : [ 0.0 ]
+				}
+
+			}
+,
+			"10" : 			{
+				"id" : 10,
+				"data" : 				{
+					"motorMaxAngularForce_Z" : [  ],
+					"motorMaxAngularForce_Z_max" : [  ],
+					"motorMaxAngularForce_Z_min" : [  ],
+					"thrusting_active_interest" : [  ],
+					"thrusting_appInterval" : [  ],
+					"thrusting_appInterval_interest" : [  ],
+					"thrusting_appInterval_max" : [  ],
+					"thrusting_appInterval_min" : [  ],
+					"thrusting_changeInterval" : [  ],
+					"thrusting_changeInterval_interest" : [  ],
+					"thrusting_changeInterval_max" : [  ],
+					"thrusting_changeInterval_min" : [  ],
+					"thrusting_maxTarget_interest" : [  ],
+					"thrusting_maxTarget_x" : [  ],
+					"thrusting_maxTarget_x_max" : [  ],
+					"thrusting_maxTarget_x_min" : [  ],
+					"thrusting_maxTarget_y" : [  ],
+					"thrusting_maxTarget_y_max" : [  ],
+					"thrusting_maxTarget_y_min" : [  ],
+					"thrusting_maxTarget_z" : [  ],
+					"thrusting_maxTarget_z_max" : [  ],
+					"thrusting_maxTarget_z_min" : [  ],
+					"thrusting_minTarget_interest" : [  ],
+					"thrusting_minTarget_x" : [  ],
+					"thrusting_minTarget_x_max" : [  ],
+					"thrusting_minTarget_x_min" : [  ],
+					"thrusting_minTarget_y" : [  ],
+					"thrusting_minTarget_y_max" : [  ],
+					"thrusting_minTarget_ymin" : [  ],
+					"thrusting_minTarget_z" : [  ],
+					"thrusting_minTarget_z_max" : [  ],
+					"thrusting_minTarget_z_min" : [  ],
+					"thrusting_speed" : [  ],
+					"thrusting_speed_interest" : [  ],
+					"thrusting_speed_max" : [  ],
+					"thrusting_speed_min" : [  ]
+				}
+
+			}
+
+		}
+
+	}
+
+}

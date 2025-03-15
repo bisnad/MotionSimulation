@@ -1,0 +1,97 @@
+{
+	"pattrstorage" : 	{
+		"name" : "u845000342",
+		"slots" : 		{
+			"1" : 			{
+				"id" : 1,
+				"data" : 				{
+					"particles_active_interest" : [ 0 ],
+					"particles_appInterval" : [ 1.0 ],
+					"particles_appInterval_interest" : [ 0 ],
+					"particles_appInterval_max" : [ 5000.0 ],
+					"particles_appInterval_min" : [ 0.0 ],
+					"particles_changeInterval" : [ 300.0 ],
+					"particles_changeInterval_interest" : [ 0 ],
+					"particles_changeInterval_max" : [ 5000.0 ],
+					"particles_changeInterval_min" : [ 0.0 ],
+					"particles_maxAmp" : [ 1.0 ],
+					"particles_maxAmp_interest" : [ 0 ],
+					"particles_maxAmp_max" : [ 3.0 ],
+					"particles_maxAmp_min" : [ 0.0 ],
+					"particles_maxDir_interest" : [ 0 ],
+					"particles_maxDir_x" : [ 1.0 ],
+					"particles_maxDir_x_max" : [ 1.0 ],
+					"particles_maxDir_x_min" : [ -1.0 ],
+					"particles_maxDir_y" : [ 1.0 ],
+					"particles_maxDir_y_max" : [ 1.0 ],
+					"particles_maxDir_y_min" : [ -1.0 ],
+					"particles_maxDir_z" : [ 1.0 ],
+					"particles_maxDir_z_max" : [ 1.0 ],
+					"particles_maxDir_z_min" : [ -1.0 ],
+					"particles_minAmp" : [ 1.0 ],
+					"particles_minAmp_interest" : [ 0 ],
+					"particles_minAmp_max" : [ 3.0 ],
+					"particles_minAmp_min" : [ 0.0 ],
+					"particles_minDir_interest" : [ 0 ],
+					"particles_minDir_x" : [ -1.0 ],
+					"particles_minDir_x_max" : [ 1.0 ],
+					"particles_minDir_x_min" : [ -1.0 ],
+					"particles_minDir_y" : [ -1.0 ],
+					"particles_minDir_y_max" : [ 1.0 ],
+					"particles_minDir_y_min" : [ -1.0 ],
+					"particles_minDir_z" : [ -1.0 ],
+					"particles_minDir_z_max" : [ 1.0 ],
+					"particles_minDir_z_min" : [ -1.0 ]
+				}
+
+			}
+,
+			"10" : 			{
+				"id" : 10,
+				"data" : 				{
+					"particles_active_interest" : [  ],
+					"particles_appInterval" : [  ],
+					"particles_appInterval_interest" : [  ],
+					"particles_appInterval_max" : [  ],
+					"particles_appInterval_min" : [  ],
+					"particles_changeInterval" : [  ],
+					"particles_changeInterval_interest" : [  ],
+					"particles_changeInterval_max" : [  ],
+					"particles_changeInterval_min" : [  ],
+					"particles_maxAmp" : [  ],
+					"particles_maxAmp_interest" : [  ],
+					"particles_maxAmp_max" : [  ],
+					"particles_maxAmp_min" : [  ],
+					"particles_maxDir_interest" : [  ],
+					"particles_maxDir_x" : [  ],
+					"particles_maxDir_x_max" : [  ],
+					"particles_maxDir_x_min" : [  ],
+					"particles_maxDir_y" : [  ],
+					"particles_maxDir_y_max" : [  ],
+					"particles_maxDir_y_min" : [  ],
+					"particles_maxDir_z" : [  ],
+					"particles_maxDir_z_max" : [  ],
+					"particles_maxDir_z_min" : [  ],
+					"particles_minAmp" : [  ],
+					"particles_minAmp_interest" : [  ],
+					"particles_minAmp_max" : [  ],
+					"particles_minAmp_min" : [  ],
+					"particles_minDir_interest" : [  ],
+					"particles_minDir_x" : [  ],
+					"particles_minDir_x_max" : [  ],
+					"particles_minDir_x_min" : [  ],
+					"particles_minDir_y" : [  ],
+					"particles_minDir_y_max" : [  ],
+					"particles_minDir_y_min" : [  ],
+					"particles_minDir_z" : [  ],
+					"particles_minDir_z_max" : [  ],
+					"particles_minDir_z_min" : [  ]
+				}
+
+			}
+
+		}
+
+	}
+
+}

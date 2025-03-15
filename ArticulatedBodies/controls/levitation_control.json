@@ -1,0 +1,97 @@
+{
+	"pattrstorage" : 	{
+		"name" : "u845000342",
+		"slots" : 		{
+			"1" : 			{
+				"id" : 1,
+				"data" : 				{
+					"levitation_active_interest" : [ 0 ],
+					"levitation_appInterval" : [ 1.0 ],
+					"levitation_appInterval_interest" : [ 0 ],
+					"levitation_appInterval_max" : [ 5000.0 ],
+					"levitation_appInterval_min" : [ 0.0 ],
+					"levitation_changeInterval" : [ 5000.0 ],
+					"levitation_changeInterval_interest" : [ 0 ],
+					"levitation_changeInterval_max" : [ 5000.0 ],
+					"levitation_changeInterval_min" : [ 0.0 ],
+					"levitation_maxAmp" : [ 1.0 ],
+					"levitation_maxAmp_interest" : [ 0 ],
+					"levitation_maxAmp_max" : [ 1.0 ],
+					"levitation_maxAmp_min" : [ 0.0 ],
+					"levitation_maxDir_interest" : [ 0 ],
+					"levitation_maxDir_x" : [ 1.0 ],
+					"levitation_maxDir_x_max" : [ 1.0 ],
+					"levitation_maxDir_x_min" : [ -1.0 ],
+					"levitation_maxDir_y" : [ 1.0 ],
+					"levitation_maxDir_y_max" : [ 1.0 ],
+					"levitation_maxDir_y_min" : [ -1.0 ],
+					"levitation_maxDir_z" : [ 1.0 ],
+					"levitation_maxDir_z_max" : [ 1.0 ],
+					"levitation_maxDir_z_min" : [ -1.0 ],
+					"levitation_minAmp" : [ 1.0 ],
+					"levitation_minAmp_interest" : [ 0 ],
+					"levitation_minAmp_max" : [ 1.0 ],
+					"levitation_minAmp_min" : [ 0.0 ],
+					"levitation_minDir_interest" : [ 0 ],
+					"levitation_minDir_x" : [ -1.0 ],
+					"levitation_minDir_x_max" : [ 1.0 ],
+					"levitation_minDir_x_min" : [ -1.0 ],
+					"levitation_minDir_y" : [ -1.0 ],
+					"levitation_minDir_y_max" : [ 1.0 ],
+					"levitation_minDir_y_min" : [ -1.0 ],
+					"levitation_minDir_z" : [ -1.0 ],
+					"levitation_minDir_z_max" : [ 1.0 ],
+					"levitation_minDir_z_min" : [ -1.0 ]
+				}
+
+			}
+,
+			"10" : 			{
+				"id" : 10,
+				"data" : 				{
+					"levitation_active_interest" : [  ],
+					"levitation_appInterval" : [  ],
+					"levitation_appInterval_interest" : [  ],
+					"levitation_appInterval_max" : [  ],
+					"levitation_appInterval_min" : [  ],
+					"levitation_changeInterval" : [  ],
+					"levitation_changeInterval_interest" : [  ],
+					"levitation_changeInterval_max" : [  ],
+					"levitation_changeInterval_min" : [  ],
+					"levitation_maxAmp" : [  ],
+					"levitation_maxAmp_interest" : [  ],
+					"levitation_maxAmp_max" : [  ],
+					"levitation_maxAmp_min" : [  ],
+					"levitation_maxDir_interest" : [  ],
+					"levitation_maxDir_x" : [  ],
+					"levitation_maxDir_x_max" : [  ],
+					"levitation_maxDir_x_min" : [  ],
+					"levitation_maxDir_y" : [  ],
+					"levitation_maxDir_y_max" : [  ],
+					"levitation_maxDir_y_min" : [  ],
+					"levitation_maxDir_z" : [  ],
+					"levitation_maxDir_z_max" : [  ],
+					"levitation_maxDir_z_min" : [  ],
+					"levitation_minAmp" : [  ],
+					"levitation_minAmp_interest" : [  ],
+					"levitation_minAmp_max" : [  ],
+					"levitation_minAmp_min" : [  ],
+					"levitation_minDir_interest" : [  ],
+					"levitation_minDir_x" : [  ],
+					"levitation_minDir_x_max" : [  ],
+					"levitation_minDir_x_min" : [  ],
+					"levitation_minDir_y" : [  ],
+					"levitation_minDir_y_max" : [  ],
+					"levitation_minDir_y_min" : [  ],
+					"levitation_minDir_z" : [  ],
+					"levitation_minDir_z_max" : [  ],
+					"levitation_minDir_z_min" : [  ]
+				}
+
+			}
+
+		}
+
+	}
+
+}

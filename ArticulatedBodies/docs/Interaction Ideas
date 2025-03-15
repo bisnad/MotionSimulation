@@ -1,0 +1,16 @@
+Interaction Ideas
+
+Simulated Arms
+
+Multi-Arms and Light Control:
+Proximity-based interaction: those lights that are closer than a distance threshold to Muriel become active, there can also be a number limit on how many lights can become active at the same time, the quality chosen by the lights is either predetermined or random
+
+Single-Arm and Light Control:
+One or two joints of Muriel are mapped on one or two joints of a multi-segmented single arm. The arm's other joints are controlled by a quality that is either predetermined or randomly chosen.
+
+Multi-Arm and Laser Control:
+
+Tip of single arm is attracted to a joint of Muriel
+
+All parts of single arm are attracted to a jount of Muriel: makes the arm wrap around Muriel she is close enough to it.
+

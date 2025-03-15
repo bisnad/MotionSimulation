@@ -1,0 +1,50 @@
+Body Part Parameters
+
+mass: <float> (Max: partMass)
+linearDamping: <float> (Max: partLinearDamping)
+angularDamping: <float> (Max: partAngularDamping)
+friction: <float> (Max: partFriction)
+rollingFriction: <float> (Max: partRollingFriction)
+restitution: <float> (Max: partRestitution)
+
+Universal Joint Parameters
+
+linearLowerLimit: <float, 3> 
+linearUpperLimit: <float, 3> 
+angularLowerLimit: <float, 3> (Max: jointAngularLowerLimit_XY & jointAngularLowerLimit_Z)
+angularUpperLimit: <float, 3> (Max: jointAngularUppreLimit_XY & jointAngularUppreLimit_Z)
+linearStopERP: <float, 3>
+angularStopERP: <float, 3> (Max: jointAngularStopERP_XY & jointAngularStopERP_Z)
+linearStopCFM: <float, 3>
+angularStopCFM: <float, 3> (Max: jointAngularStopCFM_XY & jointAngularStopCFM_Z)
+
+Universal Motor Parameters
+
+bounce: <float> (Max: motorBounce)
+damping: <float> (Max: motorDamping)
+linearActive: <bool, 3>
+angularActive: <bool, 3> (Max: motorAngularActive_XY & motorAngularActive_Z)
+linearLowerLimit: <float, 3> 
+linearUpperLimit: <float, 3>
+angularLowerLimit: <float, 3> (Max: jointAngularLowerLimit_XY & jointAngularLowerLimit_Z)
+angularUpperLimit: <float, 3> (Max: jointAngularUpperLimit_XY & jointAngularUpperLimit_Z)
+linearStopERP: <float, 3>
+angularStopERP: <float, 3> (Max: jointAngularStopERP_XY & jointAngularStopERP_Z)
+linearStopCFM: <float, 3>
+angularStopCFM: <float, 3> (Max: jointAngularStopCFM_XY & jointAngularStopCFM_Z)
+maxLinearMotorForce: <float, 3>
+maxAngularMotorForce: <float, 3> (Max: motorMaxAngularForce_XY & motorMaxAngularForce_Z)
+linearVelocity: <float, 3>
+angularVelocity: <float, 3> (Max: motorAngularVelocity_XY & motorAngularVelocity_Z)
+linearServoActive: <bool, 3>
+angularServoActive: <bool, 3> (Max: servoAngularActive_XY & servoAngularActive_Z)
+linearServoTarget: <float, 3>
+angularServoTarget: <float, 3> (Max: servoAngularPosition_XY & servoAngularPosition_Z)
+linearSpringActive: <bool, 3>
+angularSpringActive: <bool, 3> (Max: springAngularActive_XY & springAngularActive_Z)
+linearSpringStiffness: <float, 3>
+angularSpringStiffness: <float, 3> (Max: springAngularStiffness_XY & springAngularStiffness_Z)
+linearSpringDamping: <float, 3>
+angularSpringDamping: <float, 3> (Max: springAngularDamping_XY & springAngularDamping_Z)
+linearSpringRestLength: <float, 3>
+angularSpringRestLength: <float, 3> (Max: springAngularTarget_XY & springAngularTarget_Z)

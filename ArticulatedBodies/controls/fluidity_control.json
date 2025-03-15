@@ -1,0 +1,89 @@
+{
+	"pattrstorage" : 	{
+		"name" : "u845000342",
+		"slots" : 		{
+			"1" : 			{
+				"id" : 1,
+				"data" : 				{
+					"fluidity_active_interest" : [ 1 ],
+					"fluidity_appInterval" : [ 1.0 ],
+					"fluidity_appInterval_interest" : [ 0 ],
+					"fluidity_appInterval_max" : [ 5000.0 ],
+					"fluidity_appInterval_min" : [ 1.0 ],
+					"fluidity_changeInterval" : [ 2000.0 ],
+					"fluidity_changeInterval_interest" : [ 0 ],
+					"fluidity_changeInterval_max" : [ 5000.0 ],
+					"fluidity_changeInterval_min" : [ 1.0 ],
+					"fluidity_maxTarget_interest" : [ 0 ],
+					"fluidity_maxTarget_x" : [ 0.0 ],
+					"fluidity_maxTarget_x_max" : [ 1.0 ],
+					"fluidity_maxTarget_x_min" : [ -1.0 ],
+					"fluidity_maxTarget_y" : [ 0.0 ],
+					"fluidity_maxTarget_y_max" : [ 1.0 ],
+					"fluidity_maxTarget_y_min" : [ -1.0 ],
+					"fluidity_maxTarget_z" : [ 1.4 ],
+					"fluidity_maxTarget_z_max" : [ 1.4 ],
+					"fluidity_maxTarget_z_min" : [ -1.4 ],
+					"fluidity_minTarget_interest" : [ 0 ],
+					"fluidity_minTarget_x" : [ 0.0 ],
+					"fluidity_minTarget_x_max" : [ 1.0 ],
+					"fluidity_minTarget_x_min" : [ -1.0 ],
+					"fluidity_minTarget_y" : [ 0.0 ],
+					"fluidity_minTarget_y_max" : [ 1.0 ],
+					"fluidity_minTarget_ymin" : [ -1.0 ],
+					"fluidity_minTarget_z" : [ -1.4 ],
+					"fluidity_minTarget_z_max" : [ 1.4 ],
+					"fluidity_minTarget_z_min" : [ -1.4 ],
+					"fluidity_speed" : [ 0.5 ],
+					"fluidity_speed_interest" : [ 0 ],
+					"fluidity_speed_max" : [ 2.8 ],
+					"fluidity_speed_min" : [ 0.0 ]
+				}
+
+			}
+,
+			"10" : 			{
+				"id" : 10,
+				"data" : 				{
+					"fluidity_active_interest" : [  ],
+					"fluidity_appInterval" : [  ],
+					"fluidity_appInterval_interest" : [  ],
+					"fluidity_appInterval_max" : [  ],
+					"fluidity_appInterval_min" : [  ],
+					"fluidity_changeInterval" : [  ],
+					"fluidity_changeInterval_interest" : [  ],
+					"fluidity_changeInterval_max" : [  ],
+					"fluidity_changeInterval_min" : [  ],
+					"fluidity_maxTarget_interest" : [  ],
+					"fluidity_maxTarget_x" : [  ],
+					"fluidity_maxTarget_x_max" : [  ],
+					"fluidity_maxTarget_x_min" : [  ],
+					"fluidity_maxTarget_y" : [  ],
+					"fluidity_maxTarget_y_max" : [  ],
+					"fluidity_maxTarget_y_min" : [  ],
+					"fluidity_maxTarget_z" : [  ],
+					"fluidity_maxTarget_z_max" : [  ],
+					"fluidity_maxTarget_z_min" : [  ],
+					"fluidity_minTarget_interest" : [  ],
+					"fluidity_minTarget_x" : [  ],
+					"fluidity_minTarget_x_max" : [  ],
+					"fluidity_minTarget_x_min" : [  ],
+					"fluidity_minTarget_y" : [  ],
+					"fluidity_minTarget_y_max" : [  ],
+					"fluidity_minTarget_ymin" : [  ],
+					"fluidity_minTarget_z" : [  ],
+					"fluidity_minTarget_z_max" : [  ],
+					"fluidity_minTarget_z_min" : [  ],
+					"fluidity_speed" : [  ],
+					"fluidity_speed_interest" : [  ],
+					"fluidity_speed_max" : [  ],
+					"fluidity_speed_min" : [  ]
+				}
+
+			}
+
+		}
+
+	}
+
+}
