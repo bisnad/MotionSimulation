@@ -11,3 +11,14 @@
 /Swarms/.vs
 /Swarms/obj
 /Swarms/python/.spyproject
+/ExpressiveAliens/custom/agents/__pycache__
+/ExpressiveAliens/analysis/__pycache__
+/ExpressiveAliens/common/__pycache__
+/ExpressiveAliens/custom/__pycache__
+/ExpressiveAliens/custom/envs/__pycache__
+/ExpressiveAliens/custom/rewards/__pycache__
+/ExpressiveAliens/custom/states/__pycache__
+/ExpressiveAliens/custom/states/agent_states/__pycache__
+/ExpressiveAliens/custom/states/alive_states/__pycache__
+/ExpressiveAliens/learning/__pycache__
+/ExpressiveAliens/simulation/__pycache__
