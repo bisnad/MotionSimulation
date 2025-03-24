@@ -32,7 +32,8 @@ void ofApp::setup()
 		simulation.com().createOscControl(7400, "127.0.0.1", 7800);
 		simulation.com().createSender("FlockSender", "127.0.0.1", 7500, false);
 		//simulation.com().createSender("FlockSender_Pablo", "2.0.0.31", 9005, false);
-		simulation.com().createSender("FlockSender_Pablo", "192.168.0.162", 9005, false);
+		//simulation.com().createSender("FlockSender_Pablo", "192.168.0.162", 9005, false);
+		simulation.com().createSender("FlockSender_Pablo", "127.0.0.1", 9005, false);
 		//simulation.com().createSender("FlockSender", "127.0.0.1", 7500, true);
 
 		// setup mocap joint position space
@@ -61,7 +62,7 @@ void ofApp::setup()
 		// debug end
 
 		// create mocap receiver
-		simulation.com().createReceiver("mocap_receiver", 9002); // Xsens: 9005, Qualisys: 9004
+		simulation.com().createReceiver("mocap_receiver", 9007); // Xsens: 9005, Qualisys: 9004
 		mMocapSwarmListener = std::shared_ptr<dab::com::MocapSwarmListener>( new dab::com::MocapSwarmListener("mocap_swarm") );
 		simulation.com().registerListener("mocap_receiver", mMocapSwarmListener);
 

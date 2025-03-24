@@ -64,6 +64,7 @@ configuration
 
 #result_file_path = "results/biped_target1.0_ground20.0_run10"
 #result_file_path = "results/biped_target2.0_ground20.0_run10"
+result_file_path = "results/biped_target_dist1.0_move_dist1.0_run9"
 #result_file_path = "results/biped_target0.6_ground3.0_flow0.0_run13"
 #result_file_path = "results/biped_target0.6_ground3.0_flow1.0_run13"
 #result_file_path = "results/biped_target0.6_ground3.0_space0.0_run13"
@@ -71,7 +72,7 @@ configuration
 #result_file_path = "results/biped_target0.6_ground3.0_weight0.0_run13"
 #result_file_path = "results/biped_target0.6_ground3.0_weight1.0_run13"
 #result_file_path = "results/snake2_target2.0_dist2.0_run11"
-result_file_path = "results/snake2_target4.0_run13"
+#result_file_path = "results/snake2_target4.0_run13"
 
 """
 configuration frame rate

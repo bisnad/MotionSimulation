@@ -63,9 +63,9 @@ MocapSwarmListener::update(std::shared_ptr<OscMessage> pMessage)
 
 		const std::vector<_OscArg*>& arguments = pMessage->arguments();
 
-		if (address.compare("/mocap/joint/pos") == 0) updateMocapFlockPositions(arguments); // Qualisys version
-		if (address.compare("/mocap/joint/pos_world") == 0) updateMocapFlockPositions(arguments); // XSens version
-		if (address.compare("/mocap/joint/velocity") == 0) updateMocapFlockVelocities(arguments);
+		if (address.compare("/mocap/0/joint/pos") == 0) updateMocapFlockPositions(arguments); // Qualisys version
+		if (address.compare("/mocap/0/joint/pos_world") == 0) updateMocapFlockPositions(arguments); // XSens version
+		if (address.compare("/mocap/0/joint/velocity") == 0) updateMocapFlockVelocities(arguments);
 	}
 	catch (dab::Exception& e)
 	{
@@ -105,15 +105,17 @@ MocapSwarmListener::updateMocapFlockPositions(const std::vector<_OscArg*>& pArgs
 			jointPos[1] = *pArgs[argI + 1];
 			jointPos[2] = *pArgs[argI+2];
 
-			/*
+			
 			jointPos[0] *= -0.01; // from cm to m
 			jointPos[1] *= 0.01; // from cm to m and flip axis
 			jointPos[2] *= 0.01; // from cm to m
-			*/
+			
 
+			/*
 			jointPos[0] *= -1.0; // from cm to m
 			//jointPos[1] *= 1.0; // from cm to m and flip axis
 			//jointPos[2] *= 1.0; // from cm to m
+			*/
 
 			posPar->setValues(3, jointPos.data());
 
