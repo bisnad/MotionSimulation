@@ -30,30 +30,26 @@ void ofApp::setup()
 		simulation.setUpdateInterval(1.0);
 
 		simulation.com().createOscControl(7400, "127.0.0.1", 7800);
-		simulation.com().createSender("FlockSender", "127.0.0.1", 7500, false);
-		//simulation.com().createSender("FlockSender_Pablo", "2.0.0.31", 9005, false);
-		//simulation.com().createSender("FlockSender_Pablo", "192.168.0.162", 9005, false);
-		simulation.com().createSender("FlockSender_Pablo", "127.0.0.1", 9005, false);
-		//simulation.com().createSender("FlockSender", "127.0.0.1", 7500, true);
-
+		simulation.com().createSender("FlockSender", "127.0.0.1", 9005, false);
+	
 		// setup mocap joint position space
 		simulation.space().addSpace(std::shared_ptr<space::Space>(new space::Space("mocap_position", new space::KDTreeAlg(3))));
 
 		// create mocap swarm
-		Swarm* mocap_warm = new Swarm("mocap_swarm");
-		mocap_warm->addParameter("position", { 0.0, 0.0, 0.0 });
-		mocap_warm->assignNeighbors("position", "mocap_position", false, NULL);
-		mocap_warm->addParameter("velocity", { 0.1, 0.0, 0.0 });
+		Swarm* mocap_swarm = new Swarm("mocap_swarm");
+		mocap_swarm->addParameter("position", { 0.0, 0.0, 0.0 });
+		mocap_swarm->assignNeighbors("position", "mocap_position", false, NULL);
+		mocap_swarm->addParameter("velocity", { 0.1, 0.0, 0.0 });
 
 		int mocapJointCount = 23; // Xsens: 23, Qualisys: 64
 		int mocapRightHandJointIndex = 11; // right hand joint index, Xsens: 11, Qualisys: 35
 
-		mocap_warm->addAgents(mocapJointCount);
+		mocap_swarm->addAgents(mocapJointCount);
 
 		// debug begin
 		// change parameter visibility
 		int visibleJointIndex = mocapRightHandJointIndex;
-		std::vector<dab::flock::Agent*>& mocapAgents = mocap_warm->agents();
+		std::vector<dab::flock::Agent*>& mocapAgents = mocap_swarm->agents();
 		for (int agentI = 0; agentI < mocapJointCount; ++agentI)
 		{
 			if(agentI != visibleJointIndex) mocapAgents[agentI]->assignNeighbors("position", "mocap_position", false);
@@ -210,16 +206,8 @@ void ofApp::setup()
 
 		//std::cout << "swarm\n" << swarm->info(2) << "\n";
 
-		//simulation.com().registerParameter("FlockSender", "swarm", "position" );
-		//simulation.com().registerParameter("FlockSender", "swarm", "position", Eigen::Vector3f(-5.0, -5.0, -5.0), Eigen::Vector3f(5.0, 5.0, 5.0) );
-		//simulation.com().registerParameter("FlockSender", "swarm", "position", std::array<int, 2>( { 5, 10 } ) );
 		simulation.com().registerParameter("FlockSender", "swarm", "position", swarm->agentCount());
 		simulation.com().registerParameter("FlockSender", "swarm", "velocity", swarm->agentCount());
-		//simulation.com().registerParameter("FlockSender", "swarm", "position", swarm->agentCount(), Eigen::Vector3f(-5.0, -5.0, -5.0), Eigen::Vector3f(5.0, 5.0, 5.0));
-		//simulation.com().registerParameter("FlockSender", "swarm", "velocity", swarm->agentCount());
-
-		simulation.com().registerParameter("FlockSender_Pablo", "swarm", "position", swarm->agentCount());
-		simulation.com().registerParameter("FlockSender_Pablo", "swarm", "velocity", swarm->agentCount());
 
 		FlockVisuals& visuals = FlockVisuals::get();
 		visuals.showSwarm("swarm", "position", "velocity", 10);

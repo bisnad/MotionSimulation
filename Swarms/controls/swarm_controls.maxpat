@@ -4,13 +4,13 @@
 		"appversion" : 		{
 			"major" : 8,
 			"minor" : 5,
-			"revision" : 5,
+			"revision" : 4,
 			"architecture" : "x64",
 			"modernui" : 1
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 495.0, 100.0, 1199.0, 1077.0 ],
+		"rect" : [ 2048.0, 85.0, 951.0, 948.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 1,
 		"default_fontsize" : 12.0,
@@ -40,12 +40,28 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
-					"id" : "obj-138",
-					"maxclass" : "message",
-					"numinlets" : 2,
+					"fontname" : "Arial",
+					"fontsize" : 12.0,
+					"id" : "obj-40",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 1161.0, 45.0, 50.0, 22.0 ]
+					"patching_rect" : [ 1457.0, 26.0, 109.0, 22.0 ],
+					"text" : "r swarm_osc_send"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"fontname" : "Arial",
+					"fontsize" : 12.0,
+					"id" : "obj-42",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 1457.0, 64.0, 138.0, 22.0 ],
+					"text" : "udpsend 127.0.0.1 7400"
 				}
 
 			}
@@ -204,10 +220,10 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 989.0, 738.0, 156.0, 234.0 ],
+					"patching_rect" : [ 989.0, 738.0, 156.0, 241.0 ],
 					"presentation" : 1,
 					"presentation_linecount" : 10,
-					"presentation_rect" : [ 762.0, 588.0, 385.0, 141.0 ],
+					"presentation_rect" : [ 758.0, 713.0, 385.0, 144.0 ],
 					"text" : "Preset 10: Swarm on exact mocap joint\nPreset 12: Swarm quickly circles in small radius around mocap joint\nPreset 14: Sarm fluctuations around mocap joint\nPreset 18: Swarm slowly circles in large radious around joint\n\nPreset 20: Fluidity\nPreset 30: Thrusting\nPreset 40: Staccato\nPreset 50: Particles\nPreset 60: Levitation"
 				}
 
@@ -7994,7 +8010,7 @@
 						"client_rect" : [ 425, 63, 1089, 469 ],
 						"parameter_enable" : 0,
 						"parameter_mappable" : 0,
-						"storage_rect" : [ 453, 101, 1785, 1045 ]
+						"storage_rect" : [ 156, 256, 1488, 1200 ]
 					}
 ,
 					"text" : "pattrstorage",
@@ -8022,7 +8038,7 @@
 						"alignment_dist_interest" : [ 0 ],
 						"alignment_dist_max" : [ 10.0 ],
 						"alignment_dist_min" : [ 0.001 ],
-						"boundary_mirror_active" : [ 0 ],
+						"boundary_mirror_active" : [ 1 ],
 						"boundary_posX" : [ 0.0 ],
 						"boundary_posX_max" : [ 5.0 ],
 						"boundary_posX_min" : [ -5.0 ],
@@ -8044,7 +8060,7 @@
 						"boundary_sizeZ_max" : [ 5.0 ],
 						"boundary_sizeZ_min" : [ 0.0 ],
 						"boundary_size_interest" : [ 0 ],
-						"boundary_wrap_active" : [ 1 ],
+						"boundary_wrap_active" : [ 0 ],
 						"circle_amount" : [ 0.0 ],
 						"circle_amount_interest" : [ 0 ],
 						"circle_amount_max" : [ 1.0 ],
@@ -8071,7 +8087,7 @@
 						"cohesion_dist_interest" : [ 0 ],
 						"cohesion_dist_max" : [ 0.0 ],
 						"cohesion_dist_min" : [ 0.001 ],
-						"evasion_amount" : [ 0.0 ],
+						"evasion_amount" : [ 1.096774193548387 ],
 						"evasion_amount_interest" : [ 0 ],
 						"evasion_amount_max" : [ 20.0 ],
 						"evasion_amount_min" : [ 0.0 ],
@@ -8083,7 +8099,7 @@
 						"light_position_amount_interest" : [ 0 ],
 						"light_position_amount_max" : [ 1.0 ],
 						"light_position_amount_min" : [ 0.0 ],
-						"mass" : [ 0.267939892826825 ],
+						"mass" : [ 2.0 ],
 						"mass_interest" : [ 0 ],
 						"mass_max" : [ 2.0 ],
 						"mass_min" : [ 0.001 ],
@@ -8111,11 +8127,11 @@
 						"mocap_evasion_dist_interest" : [ 0 ],
 						"mocap_evasion_dist_max" : [ 10.0 ],
 						"mocap_evasion_dist_min" : [ 0.001 ],
-						"random" : [ 0.0 ],
+						"random" : [ 0.010319397283531 ],
 						"random_interest" : [ 0 ],
 						"random_max" : [ 1.0 ],
 						"random_min" : [ 0.0 ],
-						"sim_rate" : [ 2.455084359083192 ],
+						"sim_rate" : [ 10.0 ],
 						"sim_rate_interest" : [ 0 ],
 						"sim_rate_max" : [ 10.0 ],
 						"sim_rate_min" : [ 0.1 ],
@@ -8155,7 +8171,7 @@
 						"turning_amount_interest" : [ 0 ],
 						"turning_amount_max" : [ 1.0 ],
 						"turning_amount_min" : [ 0.0 ],
-						"velocity" : [ 0.0 ],
+						"velocity" : [ 0.051612903225806 ],
 						"velocity_damping" : [ 0.2 ],
 						"velocity_damping_interest" : [ 0 ],
 						"velocity_damping_max" : [ 1.0 ],
@@ -10700,6 +10716,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-42", 0 ],
+					"source" : [ "obj-40", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-394", 0 ],
 					"source" : [ "obj-401", 0 ]
 				}
@@ -12292,7 +12315,7 @@
  ],
 		"dependency_cache" : [ 			{
 				"name" : "swarm_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/Swarms_LightPainting/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/Swarms/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
