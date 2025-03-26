@@ -351,17 +351,20 @@ All OSC messages for controlling the properties of a perspective camera are stru
 The OSC messages for controlling the parameters of the appearance of body shapes exist in two variations. In both cases, the address part specifies the parameter to be modified. The variations differ with regards to the number of arguments. If the message contains only numerical arguments, then the corresponding parameters of all visual body shapes are affected. If the message contains as first argument a string and the remaining arguments are numerical, then the string is interpreted as name of the body shape whose parameter is modified. In the following documentation of the OSC messages, only the last type of message is written.
 
 - transparency of body shape : `/visuals/shape/transparency <string shape_name> <float value>`
-
 - ambience scale of body shape : `/visuals/shape/ambientscale <string shape_name> <float value>`
-
 - diffuse scale of body shape : `/visuals/shape/diffusescale <string shape_name> <float value>`
-
 - specular scale of body shape : `/visuals/shape/specularscale <string shape_name> <float value>`
-
 - specular pow of body shape : `/visuals/shape/specularpow <string shape_name> <float value>`
 - ambience colour (HSB format) of body shape : `/visuals/shape/ambientcolor <string shape_name> <float value> <float value> <float value>`
-
 - diffuse colour (HSB format) of body shape : `/visuals/shape/diffusecolor <string shape_name> <float value> <float value> <float value>`
+
+By default, the tool receives OSC messages on port  9003. To change the IP address and port, the following source code in the file ofApp.cpp  has to be modified:
+
+```
+oscControl.createReceiver("OscControlReceiver", 9003);
+```
+
+The string value passed as first parameter to the `createReceiver` function specifies the name of the OSC receiver instance. This name should not be changed since it is referred to elsewhere in the code.  The integer value passed as second parameter to the function represents the port number  on which the tool receives the OSC message. 
 
 ### Limitations and Bugs
 
