@@ -59,7 +59,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "training_pytorch/biped_target1.0_ground20.0_run10_controls_debug_v2"
+result_file_path = "results/biped_target_dist1.0_move_dist1.0_controls_run9"
 
 """
 configuration: agent
