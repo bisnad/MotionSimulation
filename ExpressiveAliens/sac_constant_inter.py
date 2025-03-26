@@ -62,7 +62,17 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "training_pytorch/biped_target1.0_ground20.0_run10_controls"
+#result_file_path = "results/biped_target1.0_ground20.0_run10"
+#result_file_path = "results/biped_target2.0_ground20.0_run10"
+result_file_path = "results/biped_target_dist1.0_move_dist1.0_run9"
+#result_file_path = "results/biped_target0.6_ground3.0_flow0.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_flow1.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_space0.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_space1.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_weight0.0_run13"
+#result_file_path = "results/biped_target0.6_ground3.0_weight1.0_run13"
+#result_file_path = "results/snake2_target2.0_dist2.0_run11"
+#result_file_path = "results/snake2_target4.0_run13"
 
 """
 configuration frame rate
@@ -74,8 +84,11 @@ frame_rate = 30.0
 configuration osc
 """
 
-osc_rec_address = "127.0.0.1"
+osc_rec_address = "0.0.0.0"
 osc_rec_port = 9005
+
+osc_send_address = "127.0.0.1"
+osc_send_port = 9003
 
 """
 configuration: agent
@@ -311,7 +324,13 @@ env.add_agent(agent)
 agent.set_reset_position(agent_reset_position)
 agent.set_reset_orientation(agent_reset_orientation)
 
+target_pos = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+target_pos_changed = True
+
 def randomise_target_pos():
+    
+    global target_pos
+    global target_pos_changed
     
     rand_azim = random.uniform(0.0, math.pi * 2.0)
     rand_dist = random.uniform(target_min_center_dist, target_max_center_dist)
@@ -320,8 +339,14 @@ def randomise_target_pos():
     rand_y = rand_dist * math.sin(rand_azim)
     rand_z = 0.0
     
-    target.body.set_position([rand_x, rand_y, rand_z])
-    target.set_reset_position([rand_x, rand_y, rand_z])
+    target_pos[0] = rand_x
+    target_pos[1] = rand_y
+    target_pos[2] = rand_z
+    
+    target_pos_changed = True
+    
+    #target.body.set_position([rand_x, rand_y, rand_z])
+    #target.set_reset_position([rand_x, rand_y, rand_z])
 
 # agent states
 # relative orientations of joints
@@ -353,13 +378,6 @@ agent.add_state(bodyVelState, "bodyVel")
 # body target state (agent body angle to target state)
 bodyTargetState = BodyTargetState()
 agent.add_state(bodyTargetState, "bodyTarget")
-
-# external control state with following content
-# 0: dist weight
-# 1 - 9: effort weight, effort taget value
-controlState = CustomState()
-controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
-agent.add_state(controlState, "control")
 
 # agent alive state
 """
@@ -441,91 +459,54 @@ env.add_reward(flowEffortReward, "flow_effort")
 
 # osc setup
 
+# osc send
+
+def create_osc_sender(osc_address, osc_port):
+    # start osc client
+    sender = udp_client.SimpleUDPClient(osc_address, osc_port)
+    
+    return sender
+
+def send_joint_orientations(sender, frame):
+    
+    joint_orientations = []
+    
+    for joint in agent.body.ordered_joints:
+        joint_orientations += [joint.get_orientation()]
+
+    sender.send_message("/agent/joint/rot", joint_orientations)
+    
+def send_joint_positions(sender, frame):
+    
+    joint_positions = []
+    
+    for joint in agent.body.ordered_joints:
+        joint_positions += [joint.get_position()]
+
+    sender.send_message("/agent/joint/pos", joint_positions)
+
+osc_sender = create_osc_sender(osc_send_address, osc_send_port)
+
+# osc receive
+
 def osc_set_target_position(address, pos_x, pos_y):
+    
+    global target_pos_changed
 
     #pos_x = args[0]
     #pos_y = args[1]
     pos_z = 0.0
-    
-    target.body.set_position([pos_x, pos_y, pos_z])
-    target.set_reset_position([pos_x, pos_y, pos_z])
 
-    print("osc_set_target_position x ", pos_x, " y ", pos_y)
+    target_pos[0] = pos_x
+    target_pos[1] = pos_y
+    target_pos[2] = pos_z
+    target_pos_changed = True
+    
 
-def osc_set_distance_scale(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[0] = control_value
-    moveDistanceReward.reward_scale = control_value
-    
-    print("osc_set_distance_scale ", control_value)
-
-def osc_set_weight_scale(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[1] = control_value
-    weightEffortReward.reward_scale = control_value
-    
-    print("osc_set_weight_scale ", control_value)
-    
-def osc_set_time_scale(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[3] = control_value
-    timeEffortReward.reward_scale = control_value
-    
-    print("osc_set_time_scale ", control_value)
-    
-def osc_set_space_scale(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[5] = control_value
-    spaceEffortReward.reward_scale = control_value
-    
-    print("osc_set_space_scale ", control_value)
-    
-def osc_set_flow_scale(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[7] = control_value
-    flowEffortReward.reward_scale = control_value
-    
-    print("osc_set_flow_scale ", control_value)
-
-def osc_set_weight_target(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[2] = control_value
-    weightEffortReward.target_value = control_value
-    
-    print("osc_set_weight_target ", control_value)
-    
-def osc_set_time_target(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[4] = control_value
-    timeEffortReward.target_value = control_value
-    
-    print("osc_set_time_target ", control_value)
-    
-def osc_set_space_target(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[6] = control_value
-    spaceEffortReward.target_value = control_value
-    
-    print("osc_set_space_target ", control_value)
-    
-def osc_set_flow_target(address, args):
-    control_value = max(min(args, 1.0), 0.0)
-    controlState.state[8] = control_value
-    flowEffortReward.target_value = control_value
-    
-    print("osc_set_flow_target ", control_value)
+    #print("osc_set_target_position x ", pos_x, " y ", pos_y)
 
 osc_handler = dispatcher.Dispatcher()
 osc_handler.map("/target/position", osc_set_target_position)
-osc_handler.map("/distance/scale", osc_set_distance_scale)
-osc_handler.map("/weight/scale", osc_set_weight_scale)
-osc_handler.map("/time/scale", osc_set_time_scale)
-osc_handler.map("/space/scale", osc_set_space_scale)
-osc_handler.map("/flow/scale", osc_set_flow_scale)
-osc_handler.map("/weight/target", osc_set_weight_target)
-osc_handler.map("/time/target", osc_set_time_target)
-osc_handler.map("/space/target", osc_set_space_target)
-osc_handler.map("/flow/target", osc_set_flow_target)
 
 osc_server = osc_server.ThreadingOSCUDPServer((osc_rec_address, osc_rec_port), osc_handler)
 
@@ -597,11 +578,27 @@ def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
     anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(images), interval=50)
     anim.save(path + filename, writer='pillow', fps=60)
     
-def run_episode(env):
+def run_episode(env, osc_sender):
+    
+    global target_pos_changed
     
     o, d, ep_ret, ep_len = env.reset(), False, 0, 0
         
     while not(d): # never ending episode (unless agent dies)
+    
+        # osc communication
+        send_joint_orientations(osc_sender, ep_len)
+        send_joint_positions(osc_sender, ep_len)
+    
+        if target_pos_changed == True:
+            
+            target.body.set_position(target_pos)
+            target.set_reset_position(target_pos)
+            
+            #print("target_pos ", target_pos)
+            
+            target_pos_changed = False
+                                    
 
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
@@ -633,6 +630,6 @@ osc_thread = threading.Thread(target=osc_start_receive)
 osc_thread.start()
 
 while(True):
-    run_episode(env)
+    run_episode(env, osc_sender)
     
 osc_server.server_close()

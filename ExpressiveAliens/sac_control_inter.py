@@ -1,14 +1,9 @@
 """
-same as sac_constant_train_v4.py
-but here, the agent is trained for being interactively controlled.
-Interactive control means that the values for dist and efforts can be changed on the fly and the agent
-will adapt its behaviour accordingly
-Training is based on randomizing for each epoch the values for dist and efforts.
-Randomization is binary, the valus can either take a minimum of maxumum value which are both specified in the config file.
-Furthermore, the dist and effort values are used as conditional controls and are therefore made part of the agent's input state vector
+this goes along with sac_constant_train_v3.py
 """
 
 import sys
+import threading
 import math
 import random
 import numpy as np
@@ -17,8 +12,13 @@ import torch.nn as nn
 import pybullet
 import gym
 import time
+from time import sleep
 import json
 import matplotlib.pyplot as plt
+from pythonosc import dispatcher
+from pythonosc import osc_server
+from pythonosc import udp_client
+
 from common.plot_utils import PlotUtils
 from common.ringbuffer import RingBuffer
 from matplotlib import animation
@@ -39,7 +39,6 @@ from custom.states.agent_states.body_target_state import BodyTargetState
 
 # import alive states
 from custom.states.alive_states.ground_contact_state import GroundContactState as GroundContactAliveState
-from custom.states.alive_states.max_velocity_state import MaxVelocityState as MaxVelocityState
 
 # import rewards
 from custom.rewards.alive_reward import AliveReward
@@ -59,12 +58,27 @@ from custom.rewards.ground_contact_reward import GroundContactReward
 from custom.envs.custom_environment import CustomEnvironment
 env_name = "Custom_Environment"
 
-
 """
 configuration
 """
 
-result_file_path = "training_pytorch/biped_target1.0_controls_run3"
+result_file_path = "training_pytorch/biped_target1.0_ground20.0_run10_controls"
+
+"""
+configuration frame rate
+"""
+
+frame_rate = 30.0
+
+"""
+configuration osc
+"""
+
+osc_rec_address = "127.0.0.1"
+osc_rec_port = 9005
+
+osc_send_address = "127.0.0.1"
+osc_send_port = 9003
 
 """
 configuration: agent
@@ -166,15 +180,15 @@ max_ep_len=800 # Maximum length of trajectory / episode / rollout.
 """
 configuration: visualization
 """
-render = False
+render = True
 
 """
 configuration: load/save model weights amd replay buffer
 """
 
 load_epoch = 0
-load_model_weights = False
-load_replay_buffer = False
+load_model_weights = True
+load_replay_buffer = True
 save_epoch_interval = 100
 save_model_weights = False
 save_replay_buffer = False
@@ -188,7 +202,7 @@ argCount = len(sys.argv)
 if argCount > 1:
     config_path = sys.argv[1]
 else:
-    config_path = "{}/config.json".format(result_file_path)    
+    config_path = "{}/config.json".format(result_file_path)   
 
 with open(config_path) as json_file: 
     config_data = json.load(json_file) 
@@ -233,11 +247,14 @@ with open(config_path) as json_file:
     agent_feet_collision_reward_scale = rewards_config["agent_feet_collision_reward_scale"]
     
     agent_ground_contact_cost = rewards_config["agent_ground_contact_cost"]
-
+    
+    agent_body_misalignment_cost = rewards_config["agent_body_misalignment_cost"]
+    agent_body_misalignment_reward_scale = rewards_config["agent_body_misalignment_reward_scale"]
+    
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
     
     agent_target_distance_reward_scale = rewards_config["agent_target_distance_reward_scale"]
-
+    
     agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
     agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
     agent_weight_effort_max_value = rewards_config["agent_weight_effort_max_value"]
@@ -261,27 +278,17 @@ with open(config_path) as json_file:
     sac_replay_size = int(model_config["sac_replay_size"])
     sac_hidden_sizes= model_config["sac_hidden_sizes"]
     
-    # training settings 
+    # training settings
     training_config = config_data["training"]
-    epochs = training_config["epochs"]
-    steps_per_epoch = training_config["steps_per_epoch"]
-    start_steps = training_config["start_steps"]
-    update_after = training_config["update_after"]
-    update_every = training_config["update_every"]
     max_ep_len = training_config["max_ep_len"]
     
-    # visualisation settings
-    render_config = config_data["visualization"]
-    render = render_config["render"]
+    # testing settings 
+    testing_config = config_data["testing"]
+    test_epoch = testing_config["test_epoch"]
+    test_episode_count = testing_config["test_episode_count"]
+    load_epoch = test_epoch
+    epochs = load_epoch
 
-    # load and save settings
-    save_config = config_data["save"]
-    load_epoch = save_config["load_epoch"]
-    load_model_weights = save_config["load_model_weights"]
-    load_replay_buffer = save_config["load_replay_buffer"]
-    save_epoch_interval = save_config["save_epoch_interval"]
-    save_model_weights = save_config["save_model_weights"]
-    save_replay_buffer = save_config["save_replay_buffer"]
 
 # initialize random number generators
 seed = 0
@@ -307,7 +314,6 @@ env.add_agent(agent)
 agent.set_reset_position(agent_reset_position)
 agent.set_reset_orientation(agent_reset_orientation)
 
-
 def randomise_target_pos():
     
     rand_azim = random.uniform(0.0, math.pi * 2.0)
@@ -319,7 +325,7 @@ def randomise_target_pos():
     
     target.body.set_position([rand_x, rand_y, rand_z])
     target.set_reset_position([rand_x, rand_y, rand_z])
-    
+
 # agent states
 # relative orientations of joints
 jointState = JointRelState()
@@ -365,11 +371,6 @@ aliveState = GroundContactAliveState()
 aliveState.feet_names = agent_feet_names
 agent.add_alive_state(aliveState, "alive")
 """
-# agent stops being alive when its root link moves too fast
-aliveState2 = MaxVelocityState()
-aliveState2.max_linear_speed = 10.0
-aliveState2.max_angular_speed = 100.0
-agent.add_alive_state(aliveState2, "alive2")
 
 # specify rewards
 
@@ -441,6 +442,129 @@ env.add_reward(timeEffortReward, "time_effort")
 env.add_reward(spaceEffortReward, "space_effort")
 env.add_reward(flowEffortReward, "flow_effort")
 
+# osc setup
+
+# osc send
+
+def create_osc_sender(osc_address, osc_port):
+    # start osc client
+    sender = udp_client.SimpleUDPClient(osc_address, osc_port)
+    
+    return sender
+
+def send_joint_orientations(sender, frame):
+    
+    joint_orientations = []
+    
+    for joint in agent.body.ordered_joints:
+        joint_orientations += [joint.get_orientation()]
+
+    sender.send_message("/agent/joint/rot", joint_orientations)
+    
+def send_joint_positions(sender, frame):
+    
+    joint_positions = []
+    
+    for joint in agent.body.ordered_joints:
+        joint_positions += [joint.get_position()]
+
+    sender.send_message("/agent/joint/pos", joint_positions)
+
+osc_sender = create_osc_sender(osc_send_address, osc_send_port)
+
+# osc receive
+
+def osc_set_target_position(address, pos_x, pos_y):
+
+    #pos_x = args[0]
+    #pos_y = args[1]
+    pos_z = 0.0
+    
+    target.body.set_position([pos_x, pos_y, pos_z])
+    target.set_reset_position([pos_x, pos_y, pos_z])
+
+    print("osc_set_target_position x ", pos_x, " y ", pos_y)
+
+def osc_set_distance_scale(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[0] = control_value
+    moveDistanceReward.reward_scale = control_value
+    
+    print("osc_set_distance_scale ", control_value)
+
+def osc_set_weight_scale(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[1] = control_value
+    weightEffortReward.reward_scale = control_value
+    
+    print("osc_set_weight_scale ", control_value)
+    
+def osc_set_time_scale(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[3] = control_value
+    timeEffortReward.reward_scale = control_value
+    
+    print("osc_set_time_scale ", control_value)
+    
+def osc_set_space_scale(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[5] = control_value
+    spaceEffortReward.reward_scale = control_value
+    
+    print("osc_set_space_scale ", control_value)
+    
+def osc_set_flow_scale(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[7] = control_value
+    flowEffortReward.reward_scale = control_value
+    
+    print("osc_set_flow_scale ", control_value)
+
+def osc_set_weight_target(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[2] = control_value
+    weightEffortReward.target_value = control_value
+    
+    print("osc_set_weight_target ", control_value)
+    
+def osc_set_time_target(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[4] = control_value
+    timeEffortReward.target_value = control_value
+    
+    print("osc_set_time_target ", control_value)
+    
+def osc_set_space_target(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[6] = control_value
+    spaceEffortReward.target_value = control_value
+    
+    print("osc_set_space_target ", control_value)
+    
+def osc_set_flow_target(address, args):
+    control_value = max(min(args, 1.0), 0.0)
+    controlState.state[8] = control_value
+    flowEffortReward.target_value = control_value
+    
+    print("osc_set_flow_target ", control_value)
+
+osc_handler = dispatcher.Dispatcher()
+osc_handler.map("/target/position", osc_set_target_position)
+osc_handler.map("/distance/scale", osc_set_distance_scale)
+osc_handler.map("/weight/scale", osc_set_weight_scale)
+osc_handler.map("/time/scale", osc_set_time_scale)
+osc_handler.map("/space/scale", osc_set_space_scale)
+osc_handler.map("/flow/scale", osc_set_flow_scale)
+osc_handler.map("/weight/target", osc_set_weight_target)
+osc_handler.map("/time/target", osc_set_time_target)
+osc_handler.map("/space/target", osc_set_space_target)
+osc_handler.map("/flow/target", osc_set_flow_target)
+
+osc_server = osc_server.ThreadingOSCUDPServer((osc_rec_address, osc_rec_port), osc_handler)
+
+def osc_start_receive():
+    osc_server.serve_forever()
+
 # reset environments which initialises environment information
 env.setDisplay(render)
 _ = env.reset()
@@ -448,6 +572,7 @@ _ = env.reset()
 # agent self collisions
 if agent_allow_self_collisions == False:
     agent.body.deactivate_self_collisions()
+
 
 # add texture to ground
 textureId = env.physics.loadTexture("textures/ground_grid2.png")
@@ -472,118 +597,6 @@ if load_model_weights:
 
 if load_replay_buffer:
     sac.load_replay_buffer(result_file_path, load_epoch)
-    
-def randomise_controls():
-    # distance reward
-    moveDistanceReward.reward_scale = float(random.randint(0, 1))
-    controlState.state[0] = moveDistanceReward.reward_scale
-    
-    # effort selection
-    effort_type = random.randint(0, 5)
-    
-    if effort_type == 0: # weight effort reward
-        weightEffortReward.reward_scale = 1.0
-        timeEffortReward.reward_scale = 0.0
-        spaceEffortReward.reward_scale = 0.0
-        flowEffortReward.reward_scale = 0.0
-        controlState.state[1] = weightEffortReward.reward_scale
-        controlState.state[3] = timeEffortReward.reward_scale 
-        controlState.state[5] = spaceEffortReward.reward_scale
-        controlState.state[7] = flowEffortReward.reward_scale 
-        
-        weightEffortReward.target_value = float(random.randint(0, 1))
-        timeEffortReward.target_value = 0.5
-        spaceEffortReward.target_value = 0.5
-        flowEffortReward.target_value = 0.5
-        controlState.state[2] = weightEffortReward.target_value 
-        controlState.state[4] = timeEffortReward.target_value 
-        controlState.state[6] = spaceEffortReward.target_value 
-        controlState.state[8] = flowEffortReward.target_value 
-        
-    elif effort_type == 1: # time effort reward
-        weightEffortReward.reward_scale = 0.0
-        timeEffortReward.reward_scale = 1.0
-        spaceEffortReward.reward_scale = 0.0
-        flowEffortReward.reward_scale = 0.0
-        controlState.state[1] = weightEffortReward.reward_scale
-        controlState.state[3] = timeEffortReward.reward_scale 
-        controlState.state[5] = spaceEffortReward.reward_scale
-        controlState.state[7] = flowEffortReward.reward_scale 
-        
-        weightEffortReward.target_value = 0.5
-        timeEffortReward.target_value = float(random.randint(0, 1))
-        spaceEffortReward.target_value = 0.5
-        flowEffortReward.target_value = 0.5  
-        controlState.state[2] = weightEffortReward.target_value 
-        controlState.state[4] = timeEffortReward.target_value 
-        controlState.state[6] = spaceEffortReward.target_value 
-        controlState.state[8] = flowEffortReward.target_value 
-
-    elif effort_type == 2: # space effort reward
-        weightEffortReward.reward_scale = 0.0
-        timeEffortReward.reward_scale = 0.0
-        spaceEffortReward.reward_scale = 1.0
-        flowEffortReward.reward_scale = 0.0
-        controlState.state[1] = weightEffortReward.reward_scale
-        controlState.state[3] = timeEffortReward.reward_scale 
-        controlState.state[5] = spaceEffortReward.reward_scale
-        controlState.state[7] = flowEffortReward.reward_scale 
-        
-        weightEffortReward.target_value = 0.5
-        timeEffortReward.target_value = 0.5
-        spaceEffortReward.target_value = float(random.randint(0, 1))
-        flowEffortReward.target_value = 0.5
-        controlState.state[2] = weightEffortReward.target_value 
-        controlState.state[4] = timeEffortReward.target_value 
-        controlState.state[6] = spaceEffortReward.target_value 
-        controlState.state[8] = flowEffortReward.target_value 
-        
-    elif effort_type == 3 : # flow effort reward
-        weightEffortReward.reward_scale = 0.0
-        timeEffortReward.reward_scale = 0.0
-        spaceEffortReward.reward_scale = 0.0
-        flowEffortReward.reward_scale = 1.0
-        controlState.state[1] = weightEffortReward.reward_scale
-        controlState.state[3] = timeEffortReward.reward_scale 
-        controlState.state[5] = spaceEffortReward.reward_scale
-        controlState.state[7] = flowEffortReward.reward_scale 
-
-        weightEffortReward.target_value = 0.5
-        timeEffortReward.target_value = 0.5
-        spaceEffortReward.target_value = 0.5
-        flowEffortReward.target_value = float(random.randint(0, 1))
-        controlState.state[2] = weightEffortReward.target_value 
-        controlState.state[4] = timeEffortReward.target_value 
-        controlState.state[6] = spaceEffortReward.target_value 
-        controlState.state[8] = flowEffortReward.target_value 
-        
-    else: # no effort reward
-        weightEffortReward.reward_scale = 0.0
-        timeEffortReward.reward_scale = 0.0
-        spaceEffortReward.reward_scale = 0.0
-        flowEffortReward.reward_scale = 0.0
-        controlState.state[1] = weightEffortReward.reward_scale
-        controlState.state[3] = timeEffortReward.reward_scale 
-        controlState.state[5] = spaceEffortReward.reward_scale
-        controlState.state[7] = flowEffortReward.reward_scale 
-        
-        weightEffortReward.target_value = 0.5
-        timeEffortReward.target_value = 0.5
-        spaceEffortReward.target_value = 0.5
-        flowEffortReward.target_value = 0.5
-        controlState.state[2] = weightEffortReward.target_value 
-        controlState.state[4] = timeEffortReward.target_value 
-        controlState.state[6] = spaceEffortReward.target_value 
-        controlState.state[8] = flowEffortReward.target_value 
-
-    #debug 
-    """
-    print("random disc sc ", moveDistanceReward.reward_scale,
-          "weight sc ", weightEffortReward.reward_scale, " ta ", weightEffortReward.target_value,
-          " time sc ", timeEffortReward.reward_scale, " ta ", timeEffortReward.target_value,
-          " space sc ", spaceEffortReward.reward_scale, " ta ", spaceEffortReward.target_value,
-          " flow sc ", flowEffortReward.reward_scale, " ta ", flowEffortReward.target_value)
-    """
 
 # output gym render frames as gif
 def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
@@ -616,21 +629,17 @@ def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
 
     anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(images), interval=50)
     anim.save(path + filename, writer='pillow', fps=60)
-
-def export_episode(env, sim_file, reward_file, value_file):
     
-    episode_rewards = {}
-    episode_values = {}
+def run_episode(env, osc_sender):
     
-    for reward_name in env.reward_names:
-        episode_rewards[reward_name] = []
-        episode_values[reward_name] = []
-    
-    sim_images = []
     o, d, ep_ret, ep_len = env.reset(), False, 0, 0
         
-    while not(d or (ep_len == max_ep_len)):
-            
+    while not(d): # never ending episode (unless agent dies)
+    
+        # osc communication
+        send_joint_orientations(osc_sender, ep_len)
+        send_joint_positions(osc_sender, ep_len)
+
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
         # use the learned policy. 
@@ -642,17 +651,9 @@ def export_episode(env, sim_file, reward_file, value_file):
         ep_ret += r
         ep_len += 1
         
-        for reward, reward_name in zip(env.rewards, env.reward_names):
-            
-            #print("reward ", reward_name, " value ", reward.value)
-            
-            episode_rewards[reward_name].append(reward.reward)
-            episode_values[reward_name].append(reward.value)
-        
-        env.camera.look_at(env.agent.body.get_position());
-            
-        sim_images.append(env.render(mode="rgb_array"))
-        
+        env.camera.look_at(env.agent.body.get_position())
+        env.render(mode="human")
+
         # Ignore the "done" signal if it comes from hitting the time
         # horizon (that is, when it's an artificial terminal signal
         # that isn't based on the agent's state)
@@ -662,193 +663,13 @@ def export_episode(env, sim_file, reward_file, value_file):
         # most recent observation!
         o = o2
         
-    
-    save_frames_as_gif(sim_images, filename=sim_file + ".gif") 
-    
-    plot_labels = list(episode_rewards.keys())
-    
-    plot_x = np.arange(len(episode_values["alive"]))
-    plot_rewards_y = np.array(list(episode_rewards.values()))
-    plot_rewards_y = plot_rewards_y[:, :-1] # drop last reward
-    plot_values_y = np.array(list(episode_values.values()))
-    plot_values_y = plot_values_y[:, :-1] # drop last value
-    
-    reward_images = PlotUtils.create_plot_anim(plot_x, plot_rewards_y, plot_labels, 15, 5)
-    save_images_as_gif(reward_images, filename=reward_file + ".gif") 
-    #reward_images[0].save(reward_file + ".gif", save_all=True, append_images=reward_images[1:])
-    PlotUtils.save_data_as_csv(plot_rewards_y, plot_labels, reward_file + ".csv")
-    
-    value_images = PlotUtils.create_plot_anim(plot_x, plot_values_y, plot_labels, 15, 5)
-    save_images_as_gif(value_images, filename=value_file + ".gif") 
-    #value_images[0].save(value_file + ".gif", save_all=True, append_images=value_images[1:])
-    PlotUtils.save_data_as_csv(plot_values_y, plot_labels, value_file + ".csv")
+        sleep(1.0 / frame_rate)
 
 
-def train_agent(epochs, steps_per_epoch, render):
+osc_thread = threading.Thread(target=osc_start_receive)
+osc_thread.start()
 
-    episode_counter = 0    
+while(True):
+    run_episode(env, osc_sender)
     
-    # store rewards for current episode
-    ep_reward = [0.0] * (len(env.rewards) + 1)
-    
-    # store reward history
-    reward_history = {}
-    
-    # initialise stored rewards
-    reward_history["length"] = []
-    reward_history["total"] = []
-    for reward_name in env.reward_names:
-        reward_history[reward_name] = []
-
-    # To store reward history of each episode
-    ep_reward_list = []
-    
-    # To store average reward history of last few episodes
-    avg_reward_list = []    
-
-    # Prepare for interaction with environment
-    total_steps = steps_per_epoch * epochs
-    start_time = time.time()
-    
-    """
-    if render:
-        env.render() # call this before env.reset, if you want a window showing the environment
-    """
-    
-    randomise_target_pos()
-    randomise_controls()
-    o, ep_ret, ep_len = env.reset(), 0, 0
-    
-    # Main loop: collect experience in env and update/log each epoch
-    for t in range(total_steps):
-        
-        # Until start_steps have elapsed, randomly sample actions
-        # from a uniform distribution for better exploration. Afterwards, 
-        # use the learned policy. 
-        if t > start_steps or load_replay_buffer == True:
-            a = sac.get_action(np.expand_dims(o, 0))
-            a = np.squeeze(a, 0)
-        else:
-            a = env.action_space.sample()
-    
-        # Step the env
-        o2, r, d, _ = env.step(a)
-        ep_ret += r
-        ep_len += 1
-        
-        ep_reward[0] += r
-        for rI, reward in enumerate(env.rewards):
-            ep_reward[rI+1] += reward.reward
-            
-        # check if target position needs to be reset
-        if target_reset_when_agent_close == True:
-            agent_pos = Utils.average_body_position(agent)
-            target_pos = Utils.average_body_position(target)
-            target_dist = np.linalg.norm([target_pos[1] - agent_pos[1], target_pos[0] - agent_pos[0]])
-            
-            #print("agent_pos ", agent_pos, " target_pos ", target_pos, " target_dist ", target_dist, " target_reset_agent_max_distance ", target_reset_agent_max_distance )
-            
-            if target_dist < target_reset_agent_max_distance:
-                
-                #print("randomise_target_pos")
-                
-                randomise_target_pos()
-                randomise_controls()
-        
-        if render:
-            env.render(mode="human")
-    
-        # Ignore the "done" signal if it comes from hitting the time
-        # horizon (that is, when it's an artificial terminal signal
-        # that isn't based on the agent's state)
-        d = False if ep_len==max_ep_len else d
-    
-        # Store experience to replay buffer
-        sac.store_experience(o, a, r, o2, d)
-    
-        # Super critical, easy to overlook step: make sure to update 
-        # most recent observation!
-        o = o2
-        
-        # debug
-        #print("weightEffortReward value ", weightEffortReward.value, " reward ", weightEffortReward.reward)
-    
-        # End of trajectory handling
-        if d or (ep_len == max_ep_len):
-            episode_counter += 1
-            
-            avg_reward = np.mean(ep_reward_list[-40:])
-            
-            ep_reward_list.append(ep_ret)
-            avg_reward_list.append(avg_reward)
-            
-            # store final episode rewards
-            reward_history["length"].append(ep_len)
-            reward_history["total"].append(ep_reward[0])
-            for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
-                reward_history[reward_name].append(ep_reward[rI+1])
-            # reset episode rewards
-            ep_reward = [0.0] * (len(env.rewards) + 1)
-
-            epoch = (t+1) // steps_per_epoch
-            epoch += load_epoch
-            #print("Episode: {} Length: {} Walk Dist: {} Reward: Current {} Avg {}".format(episode_counter, ep_len, env.agent.walk_dist, ep_ret, avg_reward))
-            print("Epoch {} Episode: {} Length: {} Reward: Current {} Avg {}".format(epoch, episode_counter, ep_len, ep_ret, avg_reward))
-            
-            # debug
-            # print("target dist: ", env.agent.walk_target_dist) 
-            
-            #print("er ", ep_ret, " el ", ep_len, " a ", a)
-            randomise_target_pos()
-            randomise_controls()
-            o, ep_ret, ep_len = env.reset(), 0, 0
-            
-                
-        # Update handling
-        if t >= update_after and t % update_every == 0:
-            sac.replay_experience()
-
-    
-        # End of epoch handling
-        if (t+1) % steps_per_epoch == 0:
-            epoch = (t+1) // steps_per_epoch
-            epoch += load_epoch
-            
-            if epoch % save_epoch_interval == 0:
-                
-                if save_model_weights:
-                    sac.save_weights(result_file_path, epoch=epoch)
-                if save_replay_buffer:
-                    sac.save_replay_buffer(result_file_path, epoch=epoch)
-                            
-    return reward_history
-    #return avg_reward_list, ep_reward_list
-
-# train agent
-reward_history = train_agent(epochs, steps_per_epoch, False)
-
-PlotUtils.save_loss_as_csv(reward_history, result_file_path + "/reward_history_{}.csv".format(epochs))
-sac.save_weights(result_file_path, epoch=epochs)
-sac.save_replay_buffer(result_file_path, epoch=epochs)
-#avg_reward, ep_reward = train_agent(epochs, steps_per_epoch, True)
-
-"""
-epochs=50
-start_steps = 0
-
-# env.sim_sub_steps = 20
-# env.sim_time_step = 1.0 / (env.sim_sub_steps * 60)
-# env.sim_solver_iterations = 500
-# env.physics.setPhysicsEngineParameter(fixedTimeStep=env.sim_time_step * env.sim_sub_steps, numSolverIterations=env.sim_solver_iterations, numSubSteps=env.sim_sub_steps)
-
-
-
-epochs = 500
-
-sac.save_weights(result_file_path, epoch=epoch)
-sac.save_replay_buffer(result_file_path, epoch=epoch)
-                
-for export_index in range(episode_export_count):
-    export_episode(env, "{}/sim_{}_{}".format(result_file_path, epochs, export_index), "{}/reward_{}_{}".format(result_file_path, epochs, export_index), "{}/value_{}_{}".format(result_file_path, epochs, export_index))
-
-"""
+osc_server.server_close()
