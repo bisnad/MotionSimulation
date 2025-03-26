@@ -16,15 +16,14 @@ The software can be downloaded by cloning the [MotionSimulation Github repositor
 
 ### Directory Structure
 
-Swarms(contains tool specific python scripts)
+Swarms
 
 - bin (contains the software  executable and dynamic libraries)
   - data
     - shaders (contains GLSL shader code to render the flocking agents)
-- controls (contains two example Max patches for controls the tool by sending OSC messages)
+- controls (contains two example Max patches for controlling the tool by sending OSC messages)
 - data 
   - media (contains media used in this Readme)
-- max (contains an example Max patch for forwarding OSC messages received by the Swarms tool to multiple IP addresses and ports)
 - src (contains the source code files)
 
 ### Usage
@@ -41,9 +40,27 @@ This tool runs a flocking simulation that models  the behaviour of agents that e
 
 In the example provided, the first flock consists of 23 agents. This number of agents matches the number of joints that were captured from the dancer using the [XSens Awinda](https://www.movella.com/products/wearables/xsens-mtw-awinda) motion capture system. The agents in this flock possess as physical properties "position" and "velocity" and lack any behaviours.
 
+To change the number of agents in the first flock,  the following source code in the file ofApp.cpp has to be modified:
+
+```
+int mocapJointCount = 23;
+```
+
+ The integer value assigned to the variable `mocapJointCount` represents the number of agents in the first flock.
+
 **Flock 2**
 
-In the example provided, the second flock consists of 16 agents. This number of agents matches the number of robotics lights that were used in the dance pieces "Re-Embodied Machine" and "Incubatio". Agents in this flock possess as physical properties "mass", "position", "velocity", "acceleration", and "force". These agents possess the following behaviours:
+In the example provided, the second flock consists of 16 agents. This number of agents matches the number of robotics lights that were used in the dance pieces "Re-Embodied Machine" and "Incubatio". 
+
+To change the number of agents in the second flock,  the following source code in the file ofApp.cpp has to be modified:
+
+```
+swarm->addAgents(16);
+```
+
+The integer value passed to the function `addAgents`represents the number of agents in the second flock.
+
+Agents in this flock possess as physical properties "mass", "position", "velocity", "acceleration", and "force". These agents possess the following behaviours:
 
 - randomize : to generate forces that randomly perturb the motion of the agents.
 - damping : to cause the agents to move with a specific speed

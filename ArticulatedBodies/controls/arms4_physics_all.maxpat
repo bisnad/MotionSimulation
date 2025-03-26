@@ -4,13 +4,13 @@
 		"appversion" : 		{
 			"major" : 8,
 			"minor" : 5,
-			"revision" : 5,
+			"revision" : 4,
 			"architecture" : "x64",
 			"modernui" : 1
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 583.0, 200.0, 932.0, 824.0 ],
+		"rect" : [ 583.0, 200.0, 1248.0, 824.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -41,13 +41,39 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"fontname" : "Arial",
+					"fontsize" : 12.0,
+					"id" : "obj-40",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1134.0, 209.0, 134.0, 22.0 ],
+					"text" : "r ea_physics_osc_send"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"fontname" : "Arial",
+					"fontsize" : 12.0,
+					"id" : "obj-7",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 1134.0, 247.0, 138.0, 22.0 ],
+					"text" : "udpsend 127.0.0.1 9003"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-5",
 					"linecount" : 3,
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 375.0, 88.585365533828735, 150.0, 47.0 ],
-					"presentation_linecount" : 3,
+					"patching_rect" : [ 375.0, 88.585365533828735, 150.0, 48.0 ],
 					"text" : "arms4 scene preset:\nphysics: 131\nrotoscil behaviour: 2"
 				}
 
@@ -258,13 +284,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -342,13 +368,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -426,13 +452,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1120,7 +1146,7 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 197.0, 88.585365533828735, 150.0, 127.0 ],
+					"patching_rect" : [ 197.0, 88.585365533828735, 150.0, 131.0 ],
 					"text" : "quality physics presets\n\nlevitation: 110\nparticles: 100\nthrusting: 120\nstaccato: 130\nfluidity: 140\ntargetpos: 100\nrotoscil: 120 or 130"
 				}
 
@@ -1160,13 +1186,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1246,13 +1272,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1332,13 +1358,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1418,13 +1444,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1504,13 +1530,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1590,13 +1616,13 @@
 						"appversion" : 						{
 							"major" : 8,
 							"minor" : 5,
-							"revision" : 5,
+							"revision" : 4,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 932.0, 798.0 ],
+						"rect" : [ 0.0, 26.0, 1248.0, 798.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -2308,6 +2334,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-7", 0 ],
+					"source" : [ "obj-40", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-31", 0 ],
 					"source" : [ "obj-43", 3 ]
 				}
@@ -2463,126 +2496,126 @@
  ],
 		"dependency_cache" : [ 			{
 				"name" : "fluidity_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "fluidity_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "levitation_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "levitation_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "master_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "master_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "particles_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "particles_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "physics_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "physics_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "rotation_oscil.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "rotation_oscil_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "staccato_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "staccato_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "target_all_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "target_all_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "thrusting_control.json",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "thrusting_control.maxpat",
-				"bootpath" : "~/Projects/Incubatio/Software_Git/Incubatio/ExpressiveAliens_4arms/controls",
+				"bootpath" : "~/Projects/Premiere/Software_Git2/MotionSimulation/ArticulatedBodies/controls",
 				"patcherrelativepath" : ".",
 				"type" : "JSON",
 				"implicit" : 1
