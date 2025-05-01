@@ -1,0 +1,90 @@
+{
+    "data":
+    {
+        "result_file_path": "results/biped_target_dist1.0_move_dist1.0_controls_run9"
+    },
+    "agent":
+    {
+        "agent_model_file_path": "3d_models/biped_v2/body.urdf",
+        "agent_power": 4.0,
+        "agent_reset_position": [0.0, 0.0, 2.4],
+        "agent_reset_orientation": [0.0, 0.0, 1.0, 0.0],
+        "agent_feet_names": ["simple_foot", "simple_foot_2"],
+        "agent_allow_self_collisions": true
+    },
+    "target":
+    {
+        "target_min_center_dist": 8.0,
+        "target_max_center_dist": 10.0,
+        "target_reset_when_agent_close": true,
+        "target_reset_agent_max_distance": 2.0
+    },
+    "reward":
+    {
+        "agent_alive_cost": 0.2,
+        "agent_not_alive_cost": -1000,
+        "agent_alive_reward_scale": 1.0,
+        "agent_joint_comfort_rotation_range": 0.7,
+        "agent_joint_comfort_force_range": 5000,
+        "agent_joint_max_force": 10000.0,
+        "agent_joint_torque_cost": -0.5,
+        "agent_joint_limit_cost": -0.2, 
+        "agent_joint_rotation_cost": -0.02, 
+        "agent_joint_force_cost": -0.02,
+        "agent_joint_reward_scale": 0.0,
+        "agent_feet_collision_cost": -1.0,
+        "agent_feet_collision_reward_scale": 1.0,
+        "agent_ground_contact_cost": -10.0,
+        "agent_body_misalignment_cost": -1.0,
+        "agent_body_misalignment_reward_scale": 0.0,
+        "agent_move_distance_reward_scale": 1.0,
+        "agent_target_distance_reward_scale": 1.0,
+        "agent_weight_effort_target_value": 0.0,
+        "agent_weight_effort_reward_scale": 0.0,
+        "agent_weight_effort_max_value": 100.0,
+        "agent_time_effort_target_value": 0.0,
+        "agent_time_effort_reward_scale": 0.0,
+        "agent_time_effort_max_value": 200.0,
+        "agent_space_effort_target_value": 0.0,
+        "agent_space_effort_reward_scale": 0.0,
+        "agent_space_effort_max_value": 10.0,
+        "agent_flow_effort_target_value": 0.0,
+        "agent_flow_effort_reward_scale": 1.0,
+        "agent_flow_effort_max_value": 20000.0
+    },
+    "model":
+    {
+        "sac_pi_learning_rate": 1e-4,
+        "sac_q_learning_rate": 1e-4,
+        "sac_replay_size": 1e6,
+        "sac_hidden_sizes": [256, 256, 256, 256]
+    },
+    "training":
+    {
+        "epochs": 2000,
+        "steps_per_epoch": 5000,
+        "start_steps": 5000, 
+        "update_after": 1000, 
+        "update_every": 50, 
+        "max_ep_len": 800 
+
+    },
+    "testing":
+    {
+        "test_epoch": 2000,
+        "test_episode_count": 4
+    },
+    "visualization":
+    {
+        "render": false
+    },
+    "save":
+    {
+        "load_epoch": 2000,
+        "load_model_weights": false,
+        "load_replay_buffer": false,
+        "save_epoch_interval": 100,
+        "save_model_weights": true,
+        "save_replay_buffer": true
+    }
+}

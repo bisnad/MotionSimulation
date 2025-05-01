@@ -23,3 +23,7 @@
 /ExpressiveAliens/learning/__pycache__
 /ExpressiveAliens/simulation/__pycache__
 /ExpressiveAliens/.spyproject
+ExpressiveAliens/results/biped_target_dist1.0_move_dist1.0_run9/replay_epoch_2000.p
+*.gif
+*.csv
+/ExpressiveAliens/.spyproject
