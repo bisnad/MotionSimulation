@@ -27,3 +27,4 @@ ExpressiveAliens/results/biped_target_dist1.0_move_dist1.0_run9/replay_epoch_200
 *.gif
 *.csv
 /ExpressiveAliens/.spyproject
+/ArticulatedBodies/build
