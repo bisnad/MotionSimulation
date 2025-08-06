@@ -190,7 +190,7 @@ BodyPart::setLinearDamping(float pLinearDamping)
 
 	if (mBody != nullptr)
 	{
-		mNativeBody->setDamping(mLinearDamping, mAngularDamping);
+		mNativeBody->setDamping(static_cast<btScalar>(mLinearDamping), static_cast<btScalar>(mAngularDamping));
 
 		//std::cout << "Body " << mBody->name() << " part " << mName << " setLinearDamping " << mLinearDamping << "\n";
 	}
@@ -203,7 +203,7 @@ BodyPart::setAngularDamping(float pAngularDamping)
 
 	if (mNativeBody != nullptr)
 	{
-		mNativeBody->setDamping(mLinearDamping, mAngularDamping);
+		mNativeBody->setDamping(static_cast<btScalar>(mLinearDamping), static_cast<btScalar>(mAngularDamping));
 
 		//std::cout << "Body " << mBody->name() << " part " << mName << " setAngularDamping " << mAngularDamping << "\n";
 	}
@@ -441,7 +441,7 @@ BodyPart::initPhysics()
 	//btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass,nullptr, mShape->mShape,inertia);
 	mNativeBody = new btRigidBody(rbInfo);
 	mNativeBody->setActivationState(DISABLE_DEACTIVATION);
-	mNativeBody->setDamping(mLinearDamping, mAngularDamping);
+	mNativeBody->setDamping(static_cast<btScalar>(mLinearDamping), static_cast<btScalar>(mAngularDamping));
 	mNativeBody->setFriction(mFriction);
 	mNativeBody->setRollingFriction(mRollingFriction);
 	mNativeBody->setRestitution(mRestitution);
@@ -468,7 +468,7 @@ BodyPart::initPhysics(const glm::vec3& pPosition, const glm::quat& pOrientation)
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, _motionState, mShape->mShape, inertia);
 	mNativeBody = new btRigidBody(rbInfo);
 	mNativeBody->setActivationState(DISABLE_DEACTIVATION);
-	mNativeBody->setDamping(mLinearDamping, mAngularDamping);
+	mNativeBody->setDamping(static_cast<btScalar>(mLinearDamping), static_cast<btScalar>(mAngularDamping));
 	mNativeBody->setFriction(mFriction);
 	mNativeBody->setRollingFriction(mRollingFriction);
 	mNativeBody->setRestitution(mRestitution);
@@ -490,7 +490,7 @@ BodyPart::initPhysics(const btVector3& pLocalInertiaDiagonal, const btTransform&
 
 	mNativeBody = new btRigidBody(rbInfo);
 	mNativeBody->setActivationState(DISABLE_DEACTIVATION);
-	mNativeBody->setDamping(mLinearDamping, mAngularDamping);
+	mNativeBody->setDamping(static_cast<btScalar>(mLinearDamping), static_cast<btScalar>(mAngularDamping));
 	mNativeBody->setFriction(mFriction);
 	mNativeBody->setRollingFriction(mRollingFriction);
 	mNativeBody->setRestitution(mRestitution);

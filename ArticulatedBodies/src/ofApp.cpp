@@ -25,6 +25,7 @@
 #include "dab_com_osc_control.h"
 #include "dab_urdf_importer.h"
 #include <btBulletDynamicsCommon.h>
+#include <LinearMath/btScalar.h>
 #include "dab_value.h"
 #include "dab_string_tools.h"
 #include "dab_physics_state_serialize.h"

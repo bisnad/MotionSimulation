@@ -42,7 +42,7 @@ RandomTorqueBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-RandomTorqueBehavior::update()
+RandomTorqueBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

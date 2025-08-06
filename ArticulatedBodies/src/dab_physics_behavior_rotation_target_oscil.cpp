@@ -57,7 +57,7 @@ RotationTargetOscilBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-RotationTargetOscilBehavior::update()
+RotationTargetOscilBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

@@ -44,7 +44,7 @@ RandomForceBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-RandomForceBehavior::update()
+RandomForceBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

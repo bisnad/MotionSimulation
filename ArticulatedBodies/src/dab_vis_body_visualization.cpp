@@ -20,7 +20,7 @@ BodyVisualization::BodyVisualization()
 {
 	// debug:
 	mBBoxColor = glm::vec4(1.0, 1.0, 1.0, 0.5);
-	loadShader(mBBoxShader, "shaders/color_shader.vert", "shaders/color_shader.frag");
+    loadShader(mBBoxShader, ofToDataPath("shaders/color_shader.vert"), ofToDataPath("shaders/color_shader.frag"));
 
 	// debug vis target
 	mVisTargetPositionMaterial = std::shared_ptr<Material>(new Material());
@@ -696,6 +696,8 @@ bool
 BodyVisualization::loadShader(ofShader& pShader, const std::string& pVertexShader, const std::string& pFragShader)
 {
 	bool success;
+    
+    std::cout << "BodyVisualization::loadShader pVertexShader " << pVertexShader << " pFragShader " << pFragShader << "\n";
 
 	success = pShader.setupShaderFromFile(GL_VERTEX_SHADER, pVertexShader);
 	if (success == false) std::cout << "shader " << pVertexShader << " failed: " << shaderErrorMessage(pShader, GL_VERTEX_SHADER) << "\n";

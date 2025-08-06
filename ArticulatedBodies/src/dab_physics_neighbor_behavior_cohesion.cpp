@@ -49,7 +49,7 @@ CohesionBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-CohesionBehavior::update()
+CohesionBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

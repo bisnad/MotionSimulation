@@ -31,7 +31,7 @@ UrdfImporter::~UrdfImporter()
 {}
 
 void 
-UrdfImporter::loadURDF(std::string& pFileName, bool pForceFixedBase) throw (dab::Exception)
+UrdfImporter::loadURDF(std::string pFileName, bool pForceFixedBase) throw (dab::Exception)
 {
 	try
 	{
@@ -53,7 +53,7 @@ UrdfImporter::loadURDF(std::string& pFileName, bool pForceFixedBase) throw (dab:
 }
 
 void 
-UrdfImporter::loadSDF(std::string& pFileName, bool pForceFixedBase) throw (dab::Exception)
+UrdfImporter::loadSDF(std::string pFileName, bool pForceFixedBase) throw (dab::Exception)
 {
 	try
 	{
@@ -79,7 +79,7 @@ UrdfImporter::loadSDF(std::string& pFileName, bool pForceFixedBase) throw (dab::
 }
 
 void 
-UrdfImporter::parseURDF(std::string& pFileName, bool pForceFixedBase) throw (dab::Exception)
+UrdfImporter::parseURDF(std::string pFileName, bool pForceFixedBase) throw (dab::Exception)
 {
 	try
 	{
@@ -111,7 +111,7 @@ UrdfImporter::parseURDF(std::string& pFileName, bool pForceFixedBase) throw (dab
 }
 
 void 
-UrdfImporter::parseSDF(std::string& pFileName, bool pForceFixedBase) throw (dab::Exception)
+UrdfImporter::parseSDF(std::string pFileName, bool pForceFixedBase) throw (dab::Exception)
 {
 	try
 	{
@@ -413,8 +413,8 @@ UrdfImporter::createPhysicsShape(UrdfLink& pUrdfLink, UrdfCollision& pUrdfCollis
 		// name based on mesh file
 		if (pUrdfCollision.m_geometry.m_type == URDF_GEOM_MESH || pUrdfCollision.m_geometry.m_type == URDF_GEOM_MESH)
 		{
-			std::string& meshFileName = getMeshFileName(pUrdfCollision.m_geometry.m_meshFileName);
-			std::string& meshName = getMeshName(meshFileName);
+			std::string meshFileName = getMeshFileName(pUrdfCollision.m_geometry.m_meshFileName);
+			std::string meshName = getMeshName(meshFileName);
 			pUrdfCollision.m_name = meshName + "_col_shape";
 		}
 		else // name based on link name
@@ -536,9 +536,9 @@ UrdfImporter::createPhysicsShape(UrdfLink& pUrdfLink, UrdfCollision& pUrdfCollis
 
 			geom::MeshManager& meshManager = geom::MeshManager::get();
 
-			std::string& meshFileName = getMeshFileName(pUrdfCollision.m_geometry.m_meshFileName);
+			std::string meshFileName = getMeshFileName(pUrdfCollision.m_geometry.m_meshFileName);
 			std::string meshFilePath = pPathPrefix + meshFileName;
-			std::string& meshName = getMeshName(meshFileName);
+			std::string meshName = getMeshName(meshFileName);
 
 			//std::cout << "link " << pUrdfLink.m_name << " meshFileName " << meshFileName << " meshName " << meshName << "\n";
 
@@ -689,8 +689,8 @@ UrdfImporter::createVisualShape(UrdfLink& pUrdfLink, UrdfVisual& pUrdVisual, std
 		// name based on mesh file
 		if (pUrdVisual.m_geometry.m_type == URDF_GEOM_MESH || pUrdVisual.m_geometry.m_type == URDF_GEOM_MESH)
 		{
-			std::string& meshFileName = getMeshFileName(pUrdVisual.m_geometry.m_meshFileName);
-			std::string& meshName = getMeshName(meshFileName);
+			std::string meshFileName = getMeshFileName(pUrdVisual.m_geometry.m_meshFileName);
+			std::string meshName = getMeshName(meshFileName);
 			pUrdVisual.m_name = meshName + "_vis_shape";
 		}
 		else // name based on link name
@@ -770,9 +770,9 @@ UrdfImporter::createVisualShape(UrdfLink& pUrdfLink, UrdfVisual& pUrdVisual, std
 
 			geom::MeshManager& meshManager = geom::MeshManager::get();
 
-			std::string& meshFileName = getMeshFileName(pUrdVisual.m_geometry.m_meshFileName);
+			std::string meshFileName = getMeshFileName(pUrdVisual.m_geometry.m_meshFileName);
 			std::string meshFilePath = pPathPrefix + meshFileName;
-			std::string& meshName = getMeshName(meshFileName);
+			std::string meshName = getMeshName(meshFileName);
 
 			//std::cout << "link " << pUrdfLink.m_name << " meshFileName " << meshFileName << " meshName " << meshName << "\n";
 

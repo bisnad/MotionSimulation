@@ -57,7 +57,7 @@ RandomRotationTargetBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-RandomRotationTargetBehavior::update()
+RandomRotationTargetBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

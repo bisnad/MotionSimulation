@@ -49,7 +49,7 @@ ForceBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-ForceBehavior::update()
+ForceBehavior::update()  throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

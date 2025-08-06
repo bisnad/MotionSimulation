@@ -401,7 +401,7 @@ BodyMeshShape::~BodyMeshShape()
 {}
 
 void
-BodyMeshShape::initVisuals() throw (dab::Exception)
+BodyMeshShape::initVisuals()
 {
 	mVisPrimitive = std::make_shared<of3dPrimitive>(*mMesh);
 }

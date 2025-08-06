@@ -5,7 +5,7 @@
 
 #include "dab_index_map.h"
 #include "dab_exception.h"
-#include "dab_physics_simulation.h"
+//#include "dab_physics_simulation.h"
 
 namespace dab
 {
@@ -13,6 +13,7 @@ namespace dab
 namespace physics
 {
 
+class Simulation;
 class BodyPart;
 class BodyJoint;
 class BodyMotor;

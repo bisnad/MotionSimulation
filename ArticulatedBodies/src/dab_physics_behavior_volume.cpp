@@ -40,7 +40,7 @@ VolumeBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-VolumeBehavior::update()
+VolumeBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

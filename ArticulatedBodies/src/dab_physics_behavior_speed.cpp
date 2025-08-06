@@ -32,7 +32,7 @@ SpeedBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-SpeedBehavior::update()
+SpeedBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

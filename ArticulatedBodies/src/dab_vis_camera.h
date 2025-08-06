@@ -24,7 +24,7 @@ public:
 
 	void setPosition(const glm::vec3& pPosition);
 	void setRotation(const glm::vec3& pRotation);
-	void setProjection(glm::vec4& pProjection);
+	void setProjection(const glm::vec4& pProjection);
 
 protected:
 	static glm::vec3 sPosition;

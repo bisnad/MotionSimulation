@@ -35,7 +35,7 @@ TorqueBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-TorqueBehavior::update()
+TorqueBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

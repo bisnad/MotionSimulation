@@ -31,14 +31,14 @@ public:
 	UrdfImporter();
 	~UrdfImporter();
 
-	void loadURDF(std::string& pFileName, bool pForceFixedBase = false) throw (dab::Exception);
-	void loadSDF(std::string& pFileName, bool pForceFixedBase = false) throw (dab::Exception);
+	void loadURDF(std::string pFileName, bool pForceFixedBase = false) throw (dab::Exception);
+	void loadSDF(std::string pFileName, bool pForceFixedBase = false) throw (dab::Exception);
 
 protected:
 	static btScalar sDefaultCollisionMargin;
 
-	void parseURDF(std::string& pFileName, bool pForceFixedBase = false) throw (dab::Exception);
-	void parseSDF(std::string& pFileName, bool pForceFixedBase = false) throw (dab::Exception);
+	void parseURDF(std::string pFileName, bool pForceFixedBase = false) throw (dab::Exception);
+	void parseSDF(std::string pFileName, bool pForceFixedBase = false) throw (dab::Exception);
 
 	void processUrdf(UrdfModel& pUrdfModel, std::string& pPathPrefix, bool pUseSDF, bool pUseMJCF) throw (dab::Exception);
 	btTransform processUrdf(UrdfModel& pUrdfModel, UrdfLink& pUrdfLink, const btTransform& pParentTransformInWorldSpace, std::string& pPathPrefix, bool pUseSDF, bool pUseMJCF) throw (dab::Exception);

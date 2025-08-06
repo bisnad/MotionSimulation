@@ -46,7 +46,7 @@ TargetAttractionBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-TargetAttractionBehavior::update()
+TargetAttractionBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

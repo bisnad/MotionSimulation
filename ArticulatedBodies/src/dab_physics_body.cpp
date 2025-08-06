@@ -221,7 +221,7 @@ Body::addJoint(std::shared_ptr<BodyJoint> pJoint) throw (dab::Exception)
 }
 
 void
-Body::addMotor(std::shared_ptr<BodyMotor> pMotor)
+Body::addMotor(std::shared_ptr<BodyMotor> pMotor) throw (Exception)
 {
 	if (mMotors.contains(pMotor->name()))  throw dab::Exception("Physics Error: Body " + mName + " already has motor " + pMotor->name(), __FILE__, __FUNCTION__, __LINE__);
 
@@ -229,7 +229,7 @@ Body::addMotor(std::shared_ptr<BodyMotor> pMotor)
 }
 
 void
-Body::addBehavior(std::shared_ptr<Behavior> pBehavior)
+Body::addBehavior(std::shared_ptr<Behavior> pBehavior) throw (Exception)
 {
 	if (mBehaviors.contains(pBehavior->name()))  throw dab::Exception("Physics Error: Body " + mName + " already has behavior " + pBehavior->name(), __FILE__, __FUNCTION__, __LINE__);
 

@@ -50,7 +50,7 @@ Camera::setRotation(const glm::vec3& pRotation)
 }
 
 void 
-Camera::setProjection(glm::vec4& pProjection)
+Camera::setProjection(const glm::vec4& pProjection)
 {
 	mProjection = pProjection;
 }

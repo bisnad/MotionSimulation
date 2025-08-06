@@ -36,7 +36,7 @@ AlignmentBehavior::notifyParameterChange(const std::string& pParName)
 }
 
 void
-AlignmentBehavior::update()
+AlignmentBehavior::update() throw (Exception)
 {
 	bool active = mActive;
 	if (active == false) return;

@@ -9,7 +9,10 @@
 #include "dab_index_map.h"
 #include "dab_exception.h"
 #include "ofThread.h"
+#include <memory>
+
 //#include "bullet_extras/BulletWorldImporter/btBulletWorldImporter.h"
+#include "dab_physics_body.h"
 
 namespace dab
 {
