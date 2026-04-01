@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 2048.0, 85.0, 951.0, 948.0 ],
+		"rect" : [ 2048.0, 85.0, 1753.0, 948.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 1,
 		"default_fontsize" : 12.0,
@@ -132,8 +132,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1814.333317756652832, 343.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 2 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1814.333317756652832, 348.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 11 position mocap_position $1"
 				}
 
 			}
@@ -654,8 +654,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 2114.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 15 position mocap_position $1"
+					"patching_rect" : [ 335.25, 2114.333317756652832, 343.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 1 position mocap_position $1"
 				}
 
 			}
@@ -704,8 +704,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 2084.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 19 position mocap_position $1"
+					"patching_rect" : [ 335.25, 2084.333317756652832, 343.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 5 position mocap_position $1"
 				}
 
 			}
@@ -754,8 +754,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 2054.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 16 position mocap_position $1"
+					"patching_rect" : [ 335.25, 2054.333317756652832, 343.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 2 position mocap_position $1"
 				}
 
 			}
@@ -804,8 +804,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 2024.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 20 position mocap_position $1"
+					"patching_rect" : [ 335.25, 2024.333317756652832, 343.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 6 position mocap_position $1"
 				}
 
 			}
@@ -854,8 +854,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1994.333317756652832, 343.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 8 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1994.333317756652832, 349.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 18 position mocap_position $1"
 				}
 
 			}
@@ -905,7 +905,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 335.25, 1964.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 12 position mocap_position $1"
+					"text" : "/AssignNeighbors mocap_swarm 14 position mocap_position $1"
 				}
 
 			}
@@ -954,8 +954,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1934.333317756652832, 343.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 9 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1934.333317756652832, 349.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 19 position mocap_position $1"
 				}
 
 			}
@@ -1005,7 +1005,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 335.25, 1904.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 13 position mocap_position $1"
+					"text" : "/AssignNeighbors mocap_swarm 15 position mocap_position $1"
 				}
 
 			}
@@ -1054,8 +1054,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1874.333317756652832, 343.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 6 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1874.333317756652832, 349.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 22 position mocap_position $1"
 				}
 
 			}
@@ -1104,8 +1104,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1844.333317756652832, 343.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 4 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1844.333317756652832, 349.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 12 position mocap_position $1"
 				}
 
 			}
@@ -1213,8 +1213,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1754.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 21 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1754.333317756652832, 343.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 7 position mocap_position $1"
 				}
 
 			}
@@ -1252,8 +1252,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 335.25, 1724.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 17 position mocap_position $1"
+					"patching_rect" : [ 335.25, 1724.333317756652832, 343.0, 22.0 ],
+					"text" : "/AssignNeighbors mocap_swarm 3 position mocap_position $1"
 				}
 
 			}
@@ -1292,7 +1292,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 335.25, 1694.333317756652832, 349.0, 22.0 ],
-					"text" : "/AssignNeighbors mocap_swarm 14 position mocap_position $1"
+					"text" : "/AssignNeighbors mocap_swarm 16 position mocap_position $1"
 				}
 
 			}
@@ -8038,7 +8038,7 @@
 						"alignment_dist_interest" : [ 0 ],
 						"alignment_dist_max" : [ 10.0 ],
 						"alignment_dist_min" : [ 0.001 ],
-						"boundary_mirror_active" : [ 1 ],
+						"boundary_mirror_active" : [ 0 ],
 						"boundary_posX" : [ 0.0 ],
 						"boundary_posX_max" : [ 5.0 ],
 						"boundary_posX_min" : [ -5.0 ],
@@ -8050,17 +8050,17 @@
 						"boundary_posZ_min" : [ -5.0 ],
 						"boundary_pos_interest" : [ 0 ],
 						"boundary_pos_interest[1]" : [ 0 ],
-						"boundary_sizeX" : [ 5.0 ],
-						"boundary_sizeX_max" : [ 5.0 ],
+						"boundary_sizeX" : [ 20.0 ],
+						"boundary_sizeX_max" : [ 20.0 ],
 						"boundary_sizeX_min" : [ 0.0 ],
-						"boundary_sizeY" : [ 5.0 ],
-						"boundary_sizeY_max" : [ 5.0 ],
+						"boundary_sizeY" : [ 20.0 ],
+						"boundary_sizeY_max" : [ 20.0 ],
 						"boundary_sizeY_min" : [ 0.0 ],
-						"boundary_sizeZ" : [ 5.0 ],
-						"boundary_sizeZ_max" : [ 5.0 ],
+						"boundary_sizeZ" : [ 20.0 ],
+						"boundary_sizeZ_max" : [ 20.0 ],
 						"boundary_sizeZ_min" : [ 0.0 ],
 						"boundary_size_interest" : [ 0 ],
-						"boundary_wrap_active" : [ 0 ],
+						"boundary_wrap_active" : [ 1 ],
 						"circle_amount" : [ 0.0 ],
 						"circle_amount_interest" : [ 0 ],
 						"circle_amount_max" : [ 1.0 ],
@@ -8087,7 +8087,7 @@
 						"cohesion_dist_interest" : [ 0 ],
 						"cohesion_dist_max" : [ 0.0 ],
 						"cohesion_dist_min" : [ 0.001 ],
-						"evasion_amount" : [ 1.096774193548387 ],
+						"evasion_amount" : [ 0.0 ],
 						"evasion_amount_interest" : [ 0 ],
 						"evasion_amount_max" : [ 20.0 ],
 						"evasion_amount_min" : [ 0.0 ],
@@ -8099,7 +8099,7 @@
 						"light_position_amount_interest" : [ 0 ],
 						"light_position_amount_max" : [ 1.0 ],
 						"light_position_amount_min" : [ 0.0 ],
-						"mass" : [ 2.0 ],
+						"mass" : [ 0.1 ],
 						"mass_interest" : [ 0 ],
 						"mass_max" : [ 2.0 ],
 						"mass_min" : [ 0.001 ],
@@ -8111,7 +8111,7 @@
 						"mocap_alignment_dist_interest" : [ 0 ],
 						"mocap_alignment_dist_max" : [ 10.0 ],
 						"mocap_alignment_dist_min" : [ 0.001 ],
-						"mocap_cohesion_amount" : [ 0.028757718053657 ],
+						"mocap_cohesion_amount" : [ 0.2 ],
 						"mocap_cohesion_amount_interest" : [ 0 ],
 						"mocap_cohesion_amount_max" : [ 1.0 ],
 						"mocap_cohesion_amount_min" : [ 0.0 ],
@@ -8127,7 +8127,7 @@
 						"mocap_evasion_dist_interest" : [ 0 ],
 						"mocap_evasion_dist_max" : [ 10.0 ],
 						"mocap_evasion_dist_min" : [ 0.001 ],
-						"random" : [ 0.010319397283531 ],
+						"random" : [ 0.0 ],
 						"random_interest" : [ 0 ],
 						"random_max" : [ 1.0 ],
 						"random_min" : [ 0.0 ],
@@ -8135,7 +8135,7 @@
 						"sim_rate_interest" : [ 0 ],
 						"sim_rate_max" : [ 10.0 ],
 						"sim_rate_min" : [ 0.1 ],
-						"step_size" : [ 0.1 ],
+						"step_size" : [ 0.05 ],
 						"step_size_interest" : [ 0 ],
 						"step_size_max" : [ 0.2 ],
 						"step_size_min" : [ 0.0 ],
@@ -8162,7 +8162,7 @@
 						"target_velZ" : [ 0.0 ],
 						"target_velZ_max" : [ 1.0 ],
 						"target_velZ_min" : [ -1.0 ],
-						"target_vel_amount" : [ 0.0 ],
+						"target_vel_amount" : [ 0.2 ],
 						"target_vel_amount_interest" : [ 0 ],
 						"target_vel_amount_max" : [ 1.0 ],
 						"target_vel_amount_min" : [ 0.0 ],
@@ -8171,8 +8171,8 @@
 						"turning_amount_interest" : [ 0 ],
 						"turning_amount_max" : [ 1.0 ],
 						"turning_amount_min" : [ 0.0 ],
-						"velocity" : [ 0.051612903225806 ],
-						"velocity_damping" : [ 0.2 ],
+						"velocity" : [ 0.0 ],
+						"velocity_damping" : [ 0.932258064516129 ],
 						"velocity_damping_interest" : [ 0 ],
 						"velocity_damping_max" : [ 1.0 ],
 						"velocity_damping_min" : [ 0.0 ],
