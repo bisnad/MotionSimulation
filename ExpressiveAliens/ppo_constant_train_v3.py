@@ -319,6 +319,11 @@ class GymCompatWrapper(gym.Wrapper):
 def make_env(rank):
     def _thunk():
         env = gym.make(env_name)
+
+        # Give this specific environment a unique random seed
+        env_seed = 42 + rank
+        env.seed(env_seed)
+        env.action_space.seed(env_seed)
         
         # load agent and ground
         ground = Thing("plane", "3d_models/plane2/plane.urdf")
