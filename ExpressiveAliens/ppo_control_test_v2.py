@@ -64,7 +64,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_control_ppo_run1"
+result_file_path = "results/biped_control_ppo_run2"
 
 """
 configuration: agent

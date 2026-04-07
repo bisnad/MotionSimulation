@@ -144,6 +144,69 @@ class PPO:
             loss_v.backward()
             self.v_optimizer.step()
 
+    def update_batched(self, rollout_buffer, batch_size=256):
+        """
+        Perform multiple epochs of training on the batch collected in the Rollout Buffer.
+        MODIFICATION: Added Mini-batching for significantly faster and more stable learning.
+        """
+        # Allow passing a dictionary directly (useful for vectorized environments merging data)
+        if isinstance(rollout_buffer, dict):
+            data = rollout_buffer
+        else:
+            data = rollout_buffer.get()
+
+        obs = data['obs']
+        act = data['act']
+        ret = data['ret']
+        adv = data['adv']
+        logp_old = data['logp']
+
+        buffer_size = obs.shape[0]
+        indices = np.arange(buffer_size)
+
+        # 2. Train the Actor (Policy) with MINI-BATCHES
+        for i in range(self.train_pi_iters):
+            np.random.shuffle(indices)
+            kl_too_high = False
+            
+            for start in range(0, buffer_size, batch_size):
+                end = start + batch_size
+                mb_indices = indices[start:end]
+                
+                # Extract mini-batch data
+                mb_data = {k: v[mb_indices] for k, v in data.items()}
+
+                self.pi_optimizer.zero_grad()
+                loss_pi, kl = self.compute_loss_pi(mb_data)
+                
+                # EARLY STOPPING: Check KL divergence per mini-batch
+                if kl > 1.5 * self.target_kl:
+                    print(f"Early stopping at epoch {i}, mini-batch {start} due to reaching max kl.")
+                    kl_too_high = True
+                    break
+                    
+                loss_pi.backward()
+                self.pi_optimizer.step()
+            
+            # If KL was exceeded in any mini-batch, break the outer epoch loop
+            if kl_too_high:
+                break
+
+        # 3. Train the Critic (Value Function) with MINI-BATCHES
+        for i in range(self.train_v_iters):
+            np.random.shuffle(indices)
+            
+            for start in range(0, buffer_size, batch_size):
+                end = start + batch_size
+                mb_indices = indices[start:end]
+                
+                mb_data = {k: v[mb_indices] for k, v in data.items()}
+
+                self.v_optimizer.zero_grad()
+                loss_v = self.compute_loss_v(mb_data)
+                loss_v.backward()
+                self.v_optimizer.step()
+
     def load_models(self, file_path, epoch=0):
         pi_model_full_file_name = "{}/ppo_pi_epoch_{}.pth".format(file_path, epoch)
         v_model_full_file_name = "{}/ppo_v_epoch_{}.pth".format(file_path, epoch)
