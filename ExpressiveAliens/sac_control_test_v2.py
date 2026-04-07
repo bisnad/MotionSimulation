@@ -1,7 +1,5 @@
 """
-same as ppo_constant_train.py but with the following changes:
-The randomised_rewards function fully rewrites the control state with continuously sampled effort weights
-The train_agent function ends an episode when the agent is close to the target and then randomised rewards and agent position
+this goes along with sac_control_train_v2.py
 """
 
 import sys
@@ -14,10 +12,7 @@ import pybullet
 import gym
 import time
 import json
-import matplotlib
-matplotlib.use('Agg') # Prevent flickering windows (Use the 'Agg' backend)
 import matplotlib.pyplot as plt
-from PIL import Image
 from common.plot_utils import PlotUtils
 from common.ringbuffer import RingBuffer
 from matplotlib import animation
@@ -38,7 +33,6 @@ from custom.states.agent_states.body_target_state import BodyTargetState
 
 # import alive states
 from custom.states.alive_states.ground_contact_state import GroundContactState as GroundContactAliveState
-from custom.states.alive_states.max_velocity_state import MaxVelocityState as MaxVelocityState
 
 # import rewards
 from custom.rewards.alive_reward import AliveReward
@@ -54,10 +48,6 @@ from custom.rewards.flow_effort_reward import FlowEffortReward
 from custom.rewards.target_distance_reward import TargetDistanceReward
 from custom.rewards.ground_contact_reward import GroundContactReward
 
-# import PPO modules
-from learning.ppo import PPO
-from learning.ppo_rollout_buffer import PPO_RolloutBuffer
-
 # custom environment
 from custom.envs.custom_environment import CustomEnvironment
 env_name = "Custom_Environment"
@@ -66,7 +56,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_control_ppo_run1"
+result_file_path = "results/biped_target_dist1.0_move_dist1.0_controls_run9"
 
 """
 configuration: agent
@@ -148,11 +138,11 @@ agent_flow_effort_max_value = 20000.0
 configuration: model
 """
 
-ppo_pi_learning_rate = 1e-4
-ppo_vf_learning_rate = 1e-4
-ppo_steps_per_epoch = int(1e6)
-ppo_hidden_sizes=(256, 256, 256)
-ppo_activation=nn.ReLU
+sac_pi_learning_rate = 1e-4
+sac_q_learning_rate = 1e-4
+sac_replay_size = int(1e6)
+sac_hidden_sizes=(256, 256, 256)
+sac_activation=nn.ReLU
 
 """
 configuration: training
@@ -168,16 +158,18 @@ max_ep_len=800 # Maximum length of trajectory / episode / rollout.
 """
 configuration: visualization
 """
-render = False
+render = True
 
 """
 configuration: load/save model weights amd replay buffer
 """
 
 load_epoch = 0
-load_model_weights = False
+load_model_weights = True
+load_replay_buffer = True
 save_epoch_interval = 100
 save_model_weights = False
+save_replay_buffer = False
 
 """
 Read configs
@@ -188,7 +180,7 @@ argCount = len(sys.argv)
 if argCount > 1:
     config_path = sys.argv[1]
 else:
-    config_path = "{}/config.json".format(result_file_path)    
+    config_path = "{}/config.json".format(result_file_path)   
 
 with open(config_path) as json_file: 
     config_data = json.load(json_file) 
@@ -233,11 +225,14 @@ with open(config_path) as json_file:
     agent_feet_collision_reward_scale = rewards_config["agent_feet_collision_reward_scale"]
     
     agent_ground_contact_cost = rewards_config["agent_ground_contact_cost"]
-
+    
+    agent_body_misalignment_cost = rewards_config["agent_body_misalignment_cost"]
+    agent_body_misalignment_reward_scale = rewards_config["agent_body_misalignment_reward_scale"]
+    
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
     
     agent_target_distance_reward_scale = rewards_config["agent_target_distance_reward_scale"]
-
+    
     agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
     agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
     agent_weight_effort_max_value = rewards_config["agent_weight_effort_max_value"]
@@ -253,37 +248,31 @@ with open(config_path) as json_file:
     agent_flow_effort_target_value = rewards_config["agent_flow_effort_target_value"]
     agent_flow_effort_reward_scale = rewards_config["agent_flow_effort_reward_scale"]
     agent_flow_effort_max_value = rewards_config["agent_flow_effort_max_value"]
-
+    
     # model settings 
     model_config = config_data["model"]
-    ppo_pi_learning_rate = model_config["ppo_pi_learning_rate"]
-    ppo_vf_learning_rate = model_config["ppo_vf_learning_rate"]
-    ppo_hidden_sizes= model_config["ppo_hidden_sizes"]
-
+    sac_pi_learning_rate = model_config["sac_pi_learning_rate"]
+    sac_q_learning_rate = model_config["sac_q_learning_rate"]
+    sac_replay_size = int(model_config["sac_replay_size"])
+    sac_hidden_sizes= model_config["sac_hidden_sizes"]
+    
     # training settings
     training_config = config_data["training"]
-    epochs = training_config["epochs"]
-    steps_per_epoch = training_config["steps_per_epoch"]
-    start_steps = training_config["start_steps"]
-    update_after = training_config["update_after"]
-    update_every = training_config["update_every"]
     max_ep_len = training_config["max_ep_len"]
-
-    # visualization settings
-    visualization_config = config_data["visualization"]
-    render = visualization_config["render"]
     
-    # save config
-    save_config = config_data["save"]
-    load_epoch = save_config["load_epoch"]
-    load_model_weights = save_config["load_model_weights"]
-    save_epoch_interval = save_config["save_epoch_interval"]
-    save_model_weights = save_config["save_model_weights"]
+    # testing settings 
+    testing_config = config_data["testing"]
+    test_epoch = testing_config["test_epoch"]
+    test_episode_count = testing_config["test_episode_count"]
+    load_epoch = test_epoch
+    epochs = load_epoch
+
 
 # initialize random number generators
 seed = 0
 torch.manual_seed(seed)
 np.random.seed(seed)
+
 
 # create environments
 env = gym.make(env_name)
@@ -302,6 +291,19 @@ env.add_agent(agent)
 # specify start position and orientation for agent
 agent.set_reset_position(agent_reset_position)
 agent.set_reset_orientation(agent_reset_orientation)
+
+def randomise_target_pos():
+    
+    rand_azim = random.uniform(0.0, math.pi * 2.0)
+    rand_dist = random.uniform(target_min_center_dist, target_max_center_dist)
+    
+    rand_x = rand_dist * math.cos(rand_azim)
+    rand_y = rand_dist * math.sin(rand_azim)
+    rand_z = 0.0
+    
+    target.body.set_position([rand_x, rand_y, rand_z])
+    target.set_reset_position([rand_x, rand_y, rand_z])
+    
 
 # agent states
 # relative orientations of joints
@@ -348,11 +350,6 @@ aliveState = GroundContactAliveState()
 aliveState.feet_names = agent_feet_names
 agent.add_alive_state(aliveState, "alive")
 """
-# agent stops being alive when its root link moves too fast
-aliveState2 = MaxVelocityState()
-aliveState2.max_linear_speed = 10.0
-aliveState2.max_angular_speed = 100.0
-agent.add_alive_state(aliveState2, "alive2")
 
 # specify rewards
 
@@ -432,6 +429,7 @@ _ = env.reset()
 if agent_allow_self_collisions == False:
     agent.body.deactivate_self_collisions()
 
+
 # add texture to ground
 textureId = env.physics.loadTexture("textures/ground_grid2.png")
 env.physics.changeVisualShape(env.ground.body.id, -1, -1, textureId)
@@ -443,17 +441,19 @@ env_action_space = env.action_space
 env_observation_limits = np.stack( [env_observation_space.low, env_observation_space.high], axis=1)
 env_action_limits = np.stack( [env_action_space.low, env_action_space.high], axis=1)
 
-def randomise_target_pos():
-    
-    # generate random target distance and angle
-    dist = target_min_center_dist + (target_max_center_dist - target_min_center_dist) * random.random()
-    angle = random.random() * math.pi * 2.0
-    
-    target_pos = [dist * math.cos(angle), dist * math.sin(angle), 0.5]
-    
-    target.body.set_position(target_pos)
-    target.set_reset_position(target_pos)
+# reinforcement learning model
+from learning.sac import SAC
 
+# create SAC Model
+sac = SAC(env_observation_limits, env_action_limits, sac_replay_size, sac_hidden_sizes, sac_activation, sac_pi_learning_rate, sac_q_learning_rate)
+
+# load model weights and replay buffer
+if load_model_weights:
+    sac.load_weights(result_file_path, load_epoch)
+
+if load_replay_buffer:
+    sac.load_replay_buffer(result_file_path, load_epoch)
+    
 def randomise_rewards():
     # 1. Distance reward: ensure the agent always has some incentive to move 
     moveDistanceReward.reward_scale = random.uniform(0.5, 1.0)
@@ -505,41 +505,38 @@ def randomise_rewards():
 
 # output gym render frames as gif
 def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
-    """
-    Saves environment rgb_array frames directly to a GIF.
-    This is magnitudes faster than matplotlib.animation.
-    """
-    print("save_frames_as_gif frames l ", len(frames))
-    
-    # Convert numpy arrays to Pillow Images
-    images = [Image.fromarray(frame) for frame in frames]
-    
-    # Save the first image and append the rest (60 fps = ~16.6 ms per frame)
-    images[0].save(
-        path + filename, 
-        save_all=True, 
-        append_images=images[1:], 
-        duration=16.6, 
-        loop=0
-    )
+
+    #Mess with this to change frame size
+    plt.figure(figsize=(frames[0].shape[1] / 72.0, frames[0].shape[0] / 72.0), dpi=72)
+    #plt.figure(figsize=(frames[0].shape[1] / 18.0, frames[0].shape[0] / 18.0 ), dpi=72)
+
+    patch = plt.imshow(frames[0])
+    plt.axis('off')
+
+    def animate(i):
+        patch.set_data(frames[i])
+
+    anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval=50)
+    anim.save(path + filename, writer='pillow', fps=60)
 
 # output pillow images as gif
 def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
-    """
-    Saves a list of Pillow Images (from PlotUtils) directly to a GIF.
-    """
-    images[0].save(
-        path + filename, 
-        save_all=True, 
-        append_images=images[1:], 
-        duration=16.6, 
-        loop=0
-    )
+
+    #Mess with this to change frame size
+    plt.figure(figsize=(images[0].width / 72.0, images[0].height / 72.0), dpi=72)
+    #plt.figure(figsize=(frames[0].shape[1] / 18.0, frames[0].shape[0] / 18.0 ), dpi=72)
+
+    patch = plt.imshow(images[0])
+    plt.axis('off')
+
+    def animate(i):
+        patch.set_data(images[i])
+
+    anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(images), interval=50)
+    anim.save(path + filename, writer='pillow', fps=60)
 
 def export_episode(env, sim_file, reward_file, value_file):
-
-    print("export_episode sim_file ", sim_file, " reward_file ", reward_file, " value_file ", value_file)
-
+    
     episode_rewards = {}
     episode_values = {}
     
@@ -548,23 +545,21 @@ def export_episode(env, sim_file, reward_file, value_file):
         episode_values[reward_name] = []
     
     sim_images = []
-
-    randomise_target_pos()
-    o, ep_ret, ep_len = env.reset(), 0, 0
-
-    for t in range(max_ep_len):
-
-        # Sample raw PPO action, value, and log-probability
-        a_raw, v, logp = ppo.ac.step(torch.as_tensor(o, dtype=torch.float32))
-
-        # Map raw action into the environment's action bounds
-        a_env = ppo.ac.pi.raw_action_to_env_action(a_raw)
+    o, d, ep_ret, ep_len = env.reset(), False, 0, 0
+        
+    while not(d or (ep_len == max_ep_len)):
+            
+        # Until start_steps have elapsed, randomly sample actions
+        # from a uniform distribution for better exploration. Afterwards, 
+        # use the learned policy. 
+        a = sac.get_action(np.expand_dims(o, 0))
+        a = np.squeeze(a, 0)
 
         # Step the env
-        o2, r, d_env, _ = env.step(a_env)
+        o2, r, d, _ = env.step(a)
         ep_ret += r
         ep_len += 1
-
+        
         for reward, reward_name in zip(env.rewards, env.reward_names):
             
             #print("reward ", reward_name, " value ", reward.value)
@@ -606,150 +601,5 @@ def export_episode(env, sim_file, reward_file, value_file):
     #value_images[0].save(value_file + ".gif", save_all=True, append_images=value_images[1:])
     PlotUtils.save_data_as_csv(plot_values_y, plot_labels, value_file + ".csv")
 
-
-# create SPPOAC Model
-ppo = PPO(env_observation_limits, env_action_limits, steps_per_epoch)
-ppo_buffer = PPO_RolloutBuffer(len(env_observation_limits), len(env_action_limits), steps_per_epoch)
-
-# load model weights
-if load_model_weights:
-    ppo.load_weights(result_file_path, load_epoch)
-
-
-def train_agent(epochs, steps_per_epoch, render):
-
-    total_steps = steps_per_epoch * epochs
-
-    episode_counter = 0
-
-    ep_reward = [0.0] * (len(env.rewards) + 1)
-
-    ep_reward_list = [0.0]
-    avg_reward_list = [0.0]
-
-    # init history arrays
-    reward_history = {}
-    reward_history["length"] = []
-    reward_history["total"] = []
-    for reward_name in env.reward_names:
-        reward_history[reward_name] = []
-
-    randomise_target_pos()
-    randomise_rewards()
-
-    target_close = False
-
-    o, ep_ret, ep_len = env.reset(), 0, 0
-
-    # Main loop: collect experience in env and update/log each epoch
-    for t in range(total_steps):
-
-        # Sample raw PPO action, value, and log-probability
-        a_raw, v, logp = ppo.ac.step(torch.as_tensor(o, dtype=torch.float32))
-
-        # Map raw action into the environment's action bounds
-        a_env = ppo.ac.pi.raw_action_to_env_action(a_raw)
-
-        # Step the env
-        o2, r, d_env, _ = env.step(a_env)
-        ep_ret += r
-        ep_len += 1
-
-        ep_reward[0] += r
-        for rI, reward in enumerate(env.rewards):
-            ep_reward[rI + 1] += reward.reward
-
-        # Check if target position needs to be reset
-        if target_reset_when_agent_close == True:
-            agent_pos = Utils.average_body_position(agent)
-            target_pos = Utils.average_body_position(target)
-            target_dist = np.linalg.norm([target_pos[1] - agent_pos[1], target_pos[0] - agent_pos[0]])
-
-            if target_dist < target_reset_agent_max_distance:
-                target_close = True
-
-        if render:
-            env.render(mode="human")
-
-        # PPO stores the RAW action, because logp was computed for that raw Gaussian sample
-        ppo_buffer.store(o, a_raw, r, v, logp)
-
-        # Update current observation
-        o = o2
-
-        # One consistent epoch boundary
-        epoch_ended = (t > 0 and (t + 1) % steps_per_epoch == 0)
-
-        # Distinguish true terminal from truncation
-        timeout = (ep_len == max_ep_len)
-        true_terminal = d_env
-
-        # Handle any trajectory boundary
-        if true_terminal or timeout or epoch_ended or target_close == True:
-
-            # Bootstrap if we truncated the path artificially:
-            # - timeout by max_ep_len
-            # - epoch cutoff while env is still alive
-            truncated = timeout or (epoch_ended and not true_terminal)
-
-            if truncated:
-                _, last_val, _ = ppo.ac.step(torch.as_tensor(o, dtype=torch.float32))
-            else:
-                last_val = 0
-
-            ppo_buffer.finish_path(last_val)
-
-            # Reset only when the episode itself ended
-            if true_terminal or timeout:
-                episode_counter += 1
-
-                ep_reward_list.append(ep_ret)
-                avg_reward = np.mean(ep_reward_list[-40:])
-                avg_reward_list.append(avg_reward)
-
-                reward_history["length"].append(ep_len)
-                reward_history["total"].append(ep_reward[0])
-                for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
-                    reward_history[reward_name].append(ep_reward[rI + 1])
-
-                ep_reward = [0.0] * (len(env.rewards) + 1)
-
-                epoch = (t + 1) // steps_per_epoch
-                epoch += load_epoch
-                print(
-                    "Epoch {} Episode: {} Length: {} Reward: Current {} Avg {}".format(
-                        epoch, episode_counter, ep_len, ep_ret, avg_reward
-                    )
-                )
-
-                randomise_target_pos()
-                randomise_rewards()
-                target_close = False
-                o, ep_ret, ep_len = env.reset(), 0, 0
-
-        # Update PPO once per full rollout
-        if epoch_ended:
-            print("Updating PPO Networks...")
-            ppo.update(ppo_buffer)
-
-        # End of epoch handling
-        if (t + 1) % steps_per_epoch == 0:
-            epoch = (t + 1) // steps_per_epoch
-            epoch += load_epoch
-
-            if epoch % save_epoch_interval == 0:
-                if save_model_weights:
-                    ppo.save_weights(result_file_path, epoch)
-                            
-    return reward_history
-
-# train agent
-reward_history = train_agent(epochs, steps_per_epoch, False)
-PlotUtils.save_loss_as_csv(reward_history, result_file_path + "/reward_history_{}.csv".format(epochs))
-ppo.save_weights(result_file_path, epoch=epochs)
-
-
-for export_index in range(10):
+for export_index in range(test_episode_count):
     export_episode(env, "{}/sim_{}_{}".format(result_file_path, epochs, export_index), "{}/reward_{}_{}".format(result_file_path, epochs, export_index), "{}/value_{}_{}".format(result_file_path, epochs, export_index))
-
-

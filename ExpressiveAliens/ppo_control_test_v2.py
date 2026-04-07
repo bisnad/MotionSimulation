@@ -1,7 +1,5 @@
 """
-same as ppo_constant_train.py but with the following changes:
-The randomised_rewards function fully rewrites the control state with continuously sampled effort weights
-The train_agent function ends an episode when the agent is close to the target and then randomised rewards and agent position
+this goes along with ppo_control_train_v2.py
 """
 
 import sys
@@ -168,7 +166,7 @@ max_ep_len=800 # Maximum length of trajectory / episode / rollout.
 """
 configuration: visualization
 """
-render = False
+render = True
 
 """
 configuration: load/save model weights amd replay buffer
@@ -262,23 +260,14 @@ with open(config_path) as json_file:
 
     # training settings
     training_config = config_data["training"]
-    epochs = training_config["epochs"]
-    steps_per_epoch = training_config["steps_per_epoch"]
-    start_steps = training_config["start_steps"]
-    update_after = training_config["update_after"]
-    update_every = training_config["update_every"]
     max_ep_len = training_config["max_ep_len"]
 
-    # visualization settings
-    visualization_config = config_data["visualization"]
-    render = visualization_config["render"]
-    
-    # save config
-    save_config = config_data["save"]
-    load_epoch = save_config["load_epoch"]
-    load_model_weights = save_config["load_model_weights"]
-    save_epoch_interval = save_config["save_epoch_interval"]
-    save_model_weights = save_config["save_model_weights"]
+    # testing settings 
+    testing_config = config_data["testing"]
+    test_epoch = testing_config["test_epoch"]
+    test_episode_count = testing_config["test_episode_count"]
+    load_epoch = test_epoch
+    epochs = load_epoch
 
 # initialize random number generators
 seed = 0
@@ -615,141 +604,7 @@ ppo_buffer = PPO_RolloutBuffer(len(env_observation_limits), len(env_action_limit
 if load_model_weights:
     ppo.load_weights(result_file_path, load_epoch)
 
-
-def train_agent(epochs, steps_per_epoch, render):
-
-    total_steps = steps_per_epoch * epochs
-
-    episode_counter = 0
-
-    ep_reward = [0.0] * (len(env.rewards) + 1)
-
-    ep_reward_list = [0.0]
-    avg_reward_list = [0.0]
-
-    # init history arrays
-    reward_history = {}
-    reward_history["length"] = []
-    reward_history["total"] = []
-    for reward_name in env.reward_names:
-        reward_history[reward_name] = []
-
-    randomise_target_pos()
-    randomise_rewards()
-
-    target_close = False
-
-    o, ep_ret, ep_len = env.reset(), 0, 0
-
-    # Main loop: collect experience in env and update/log each epoch
-    for t in range(total_steps):
-
-        # Sample raw PPO action, value, and log-probability
-        a_raw, v, logp = ppo.ac.step(torch.as_tensor(o, dtype=torch.float32))
-
-        # Map raw action into the environment's action bounds
-        a_env = ppo.ac.pi.raw_action_to_env_action(a_raw)
-
-        # Step the env
-        o2, r, d_env, _ = env.step(a_env)
-        ep_ret += r
-        ep_len += 1
-
-        ep_reward[0] += r
-        for rI, reward in enumerate(env.rewards):
-            ep_reward[rI + 1] += reward.reward
-
-        # Check if target position needs to be reset
-        if target_reset_when_agent_close == True:
-            agent_pos = Utils.average_body_position(agent)
-            target_pos = Utils.average_body_position(target)
-            target_dist = np.linalg.norm([target_pos[1] - agent_pos[1], target_pos[0] - agent_pos[0]])
-
-            if target_dist < target_reset_agent_max_distance:
-                target_close = True
-
-        if render:
-            env.render(mode="human")
-
-        # PPO stores the RAW action, because logp was computed for that raw Gaussian sample
-        ppo_buffer.store(o, a_raw, r, v, logp)
-
-        # Update current observation
-        o = o2
-
-        # One consistent epoch boundary
-        epoch_ended = (t > 0 and (t + 1) % steps_per_epoch == 0)
-
-        # Distinguish true terminal from truncation
-        timeout = (ep_len == max_ep_len)
-        true_terminal = d_env
-
-        # Handle any trajectory boundary
-        if true_terminal or timeout or epoch_ended or target_close == True:
-
-            # Bootstrap if we truncated the path artificially:
-            # - timeout by max_ep_len
-            # - epoch cutoff while env is still alive
-            truncated = timeout or (epoch_ended and not true_terminal)
-
-            if truncated:
-                _, last_val, _ = ppo.ac.step(torch.as_tensor(o, dtype=torch.float32))
-            else:
-                last_val = 0
-
-            ppo_buffer.finish_path(last_val)
-
-            # Reset only when the episode itself ended
-            if true_terminal or timeout:
-                episode_counter += 1
-
-                ep_reward_list.append(ep_ret)
-                avg_reward = np.mean(ep_reward_list[-40:])
-                avg_reward_list.append(avg_reward)
-
-                reward_history["length"].append(ep_len)
-                reward_history["total"].append(ep_reward[0])
-                for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
-                    reward_history[reward_name].append(ep_reward[rI + 1])
-
-                ep_reward = [0.0] * (len(env.rewards) + 1)
-
-                epoch = (t + 1) // steps_per_epoch
-                epoch += load_epoch
-                print(
-                    "Epoch {} Episode: {} Length: {} Reward: Current {} Avg {}".format(
-                        epoch, episode_counter, ep_len, ep_ret, avg_reward
-                    )
-                )
-
-                randomise_target_pos()
-                randomise_rewards()
-                target_close = False
-                o, ep_ret, ep_len = env.reset(), 0, 0
-
-        # Update PPO once per full rollout
-        if epoch_ended:
-            print("Updating PPO Networks...")
-            ppo.update(ppo_buffer)
-
-        # End of epoch handling
-        if (t + 1) % steps_per_epoch == 0:
-            epoch = (t + 1) // steps_per_epoch
-            epoch += load_epoch
-
-            if epoch % save_epoch_interval == 0:
-                if save_model_weights:
-                    ppo.save_weights(result_file_path, epoch)
-                            
-    return reward_history
-
-# train agent
-reward_history = train_agent(epochs, steps_per_epoch, False)
-PlotUtils.save_loss_as_csv(reward_history, result_file_path + "/reward_history_{}.csv".format(epochs))
-ppo.save_weights(result_file_path, epoch=epochs)
-
-
-for export_index in range(10):
+for export_index in range(test_episode_count):
     export_episode(env, "{}/sim_{}_{}".format(result_file_path, epochs, export_index), "{}/reward_{}_{}".format(result_file_path, epochs, export_index), "{}/value_{}_{}".format(result_file_path, epochs, export_index))
 
 
