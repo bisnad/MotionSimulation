@@ -581,7 +581,7 @@ def export_episode(env, sim_file, reward_file, value_file):
     PlotUtils.save_data_as_csv(plot_values_y, plot_labels, value_file + ".csv")
 
 
-# create SPPOAC Model
+# create PPO Model
 ppo = PPO(env_observation_limits, env_action_limits, steps_per_epoch)
 
 # Create one buffer per parallel environment
@@ -672,38 +672,33 @@ def train_agent_vectorized(epochs, steps_per_env):
                 terminal = d_env[i]
                 
                 if terminal or timeout:
-                    # Bootstrapping
                     if timeout and not terminal:
-                        # Vectorized envs return the *new* state in o2. The *real* final state is in info.
-                        real_final_obs = infos[i].get('terminal_observation', o2[i]) if isinstance(infos, tuple) else o2[i]
-                        _, last_val, _ = ppo.ac.step(torch.as_tensor(real_final_obs, dtype=torch.float32))
+                        _, last_val, _ = ppo.ac.step(torch.as_tensor(o2[i], dtype=torch.float32))
                     else:
-                        last_val = 0
-                        
+                        last_val = 0.0
+
                     ppo_buffers[i].finish_path(last_val)
-                    
-                    # Logging history when an episode completes
+
                     episode_counter += 1
                     ep_reward_list.append(ep_ret[i])
                     avg_reward = np.mean(ep_reward_list[-40:])
-                    
-                    # Save core stats
+
                     reward_history["length"].append(ep_len[i])
                     reward_history["total"].append(ep_ret[i])
-                    
-                    # Save individual reward components
                     for rI, name in enumerate(reward_names):
                         reward_history[name].append(ep_reward_components[i, rI])
-                    
-                    epoch_ep_lens.append(ep_len[i])
-                    epoch_ep_rets.append(ep_ret[i])
 
-                    #print(f"Epoch {epoch} | Env {i} | Ep {episode_counter} | Len {ep_len[i]} | Ret {ep_ret[i]:.2f} | Avg {avg_reward:.2f}")
-                    
-                    # Reset trackers (SyncVectorEnv automatically resets the physics environment)
-                    ep_ret[i] = 0
-                    ep_len[i] = 0
-                    ep_reward_components[i] = 0.0 # Reset specific reward components to zero for this environment
+                    # IMPORTANT: explicitly reset this finished environment
+                    randomise_target_pos(i)
+                    reset_out = envs.envs[i].reset()
+                    if isinstance(reset_out, tuple):
+                        o2[i] = reset_out[0]
+                    else:
+                        o2[i] = reset_out
+
+                    ep_ret[i] = 0.0
+                    ep_len[i] = 0.0
+                    ep_reward_components[i] = 0.0
 
             o = o2
             
