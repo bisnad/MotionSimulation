@@ -464,16 +464,14 @@ env_action_space = temp_env.action_space
 env_observation_limits = np.stack( [env_observation_space.low, env_observation_space.high], axis=1)
 env_action_limits = np.stack( [env_action_space.low, env_action_space.high], axis=1)
 
-def randomise_target_pos():
+def randomise_target_pos(env_index):
     
     # generate random target distance and angle
     dist = target_min_center_dist + (target_max_center_dist - target_min_center_dist) * random.random()
     angle = random.random() * math.pi * 2.0
-    
-    target_pos = [dist * math.cos(angle), dist * math.sin(angle), 0.5]
-    
-    target.body.set_position(target_pos)
-    target.set_reset_position(target_pos)
+    t_pos = [dist * math.cos(angle), dist * math.sin(angle), 0.5]
+    envs.envs[env_index].target_obj.body.set_position(t_pos)
+    envs.envs[env_index].target_obj.set_reset_position(t_pos)
 
 # output gym render frames as gif
 def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
@@ -595,7 +593,7 @@ def train_agent_vectorized(epochs, steps_per_env):
     episode_counter = 0
     ep_reward_list = []
     
-    # MODIFICATION: Get reward names from the first environment clone
+    # Get reward names from the first environment clone
     reward_names = envs.envs[0].reward_names
     num_rewards = len(reward_names)
     
@@ -617,7 +615,7 @@ def train_agent_vectorized(epochs, steps_per_env):
     ep_ret = np.zeros(num_envs)
     ep_len = np.zeros(num_envs)
     
-    # MODIFICATION: Create a 2D array to track specific reward components for EACH environment 
+    # Create a 2D array to track specific reward components for EACH environment 
     # Shape: (4 environments, N reward types)
     ep_reward_components = np.zeros((num_envs, num_rewards))
 
@@ -648,7 +646,7 @@ def train_agent_vectorized(epochs, steps_per_env):
             ep_ret += r
             ep_len += 1
 
-            # MODIFICATION: Accumulate individual reward components for each environment
+            # Accumulate individual reward components for each environment
             for i in range(num_envs):
                 for rI, reward_obj in enumerate(envs.envs[i].rewards):
                     ep_reward_components[i, rI] += reward_obj.reward
@@ -661,11 +659,7 @@ def train_agent_vectorized(epochs, steps_per_env):
                     target_dist = np.linalg.norm([target_pos[1] - agent_pos[1], target_pos[0] - agent_pos[0]])
                     
                     if target_dist < target_reset_agent_max_distance:
-                        dist = target_min_center_dist + (target_max_center_dist - target_min_center_dist) * random.random()
-                        angle = random.random() * math.pi * 2.0
-                        t_pos = [dist * math.cos(angle), dist * math.sin(angle), 0.5]
-                        envs.envs[i].target_obj.body.set_position(t_pos)
-                        envs.envs[i].target_obj.set_reset_position(t_pos)
+                        randomise_target_pos(i)
                 
                 # Store experience in specific env's buffer
                 ppo_buffers[i].store(o[i], a_raw[i], r[i], v[i], logp[i])
@@ -684,7 +678,7 @@ def train_agent_vectorized(epochs, steps_per_env):
                         
                     ppo_buffers[i].finish_path(last_val)
                     
-                    # MODIFICATION: Logging history when an episode completes
+                    # Logging history when an episode completes
                     episode_counter += 1
                     ep_reward_list.append(ep_ret[i])
                     avg_reward = np.mean(ep_reward_list[-40:])

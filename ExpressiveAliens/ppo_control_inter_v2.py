@@ -3,6 +3,7 @@ this goes along with ppo_control_train_v2.py
 """
 
 import sys
+import threading
 import math
 import random
 import numpy as np
@@ -11,6 +12,7 @@ import torch.nn as nn
 import pybullet
 import gym
 import time
+from time import sleep
 import json
 import matplotlib
 matplotlib.use('Agg') # Prevent flickering windows (Use the 'Agg' backend)
@@ -68,7 +70,23 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_control_ppo_run1"
+result_file_path = "results/biped_control_ppo_run2"
+
+"""
+configuration frame rate
+"""
+
+frame_rate = 30.0
+
+"""
+configuration osc
+"""
+
+osc_rec_address = "127.0.0.1"
+osc_rec_port = 9005
+
+osc_send_address = "127.0.0.1"
+osc_send_port = 9003
 
 """
 configuration: agent
@@ -679,7 +697,7 @@ def run_episode(env, osc_sender):
     
     o, ep_ret, ep_len = env.reset(), 0, 0
         
-    while not(d): # never ending episode (unless agent dies)
+    while True: # never ending episode (unless agent dies)
     
         # osc communication
         send_joint_orientations(osc_sender, ep_len)
