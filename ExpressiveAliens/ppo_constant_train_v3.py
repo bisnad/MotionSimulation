@@ -67,7 +67,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_ppo_run3"
+result_file_path = "results/biped_constant_ppo_run4"
 
 """
 configuration: agent
@@ -160,6 +160,8 @@ configuration: training
 """
 
 epochs=500
+batch_size=256
+env_count = 4
 steps_per_epoch=5000
 start_steps=5000 # number of initial steps when actions are taken randomly rather than from sac model
 update_after=1000 # update step after which training of the sac model starts 
@@ -264,6 +266,8 @@ with open(config_path) as json_file:
     # training settings
     training_config = config_data["training"]
     epochs = training_config["epochs"]
+    batch_size = training_config["batch_size"]
+    env_count = training_config["env_count"]
     steps_per_epoch = training_config["steps_per_epoch"]
     start_steps = training_config["start_steps"]
     update_after = training_config["update_after"]
@@ -452,7 +456,7 @@ def make_env(rank):
     return _thunk
 
 # Setup Vectorized Environments
-num_envs = 4 # Spawn 4 parallel physics simulations
+num_envs = env_count # Spawn 4 parallel physics simulations
 envs = gym.vector.SyncVectorEnv([make_env(i) for i in range(num_envs)])
 
 # Create a temporary environment just to extract observation/action limits
@@ -727,7 +731,7 @@ def train_agent_vectorized(epochs, steps_per_env):
         
         print(f"--- Epoch {epoch} Summary ---")
         print(f"Total Episodes: {episode_counter} | Epoch Avg Len: {avg_len:.1f} | Epoch Avg Ret: {avg_ret:.2f} | Global Avg Ret: {global_avg:.2f}")
-        ppo.update_batched(merged_data, batch_size=256)
+        ppo.update_batched(merged_data, batch_size=batch_size)
         
         # Save model weights based on user configs
         current_epoch = epoch + 1 + load_epoch
