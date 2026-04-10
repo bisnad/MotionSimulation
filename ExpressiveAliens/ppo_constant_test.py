@@ -265,10 +265,6 @@ with open(config_path) as json_file:
     training_config = config_data["training"]
     max_ep_len = training_config["max_ep_len"]
 
-    # visualization settings
-    visualization_config = config_data["visualization"]
-    render = visualization_config["render"]
-    
     # testing settings 
     testing_config = config_data["testing"]
     test_epoch = testing_config["test_epoch"]

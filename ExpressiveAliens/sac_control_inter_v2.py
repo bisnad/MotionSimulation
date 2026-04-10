@@ -62,7 +62,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_target_dist1.0_move_dist1.0_controls_run9"
+result_file_path = "results/biped_control_sac_run1"
 
 """
 configuration frame rate
