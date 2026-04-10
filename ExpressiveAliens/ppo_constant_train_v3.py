@@ -67,7 +67,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_ppo_run4"
+result_file_path = "results/biped_constant_ppo_run2"
 
 """
 configuration: agent
@@ -731,8 +731,8 @@ def train_agent_vectorized(epochs, steps_per_env):
         print(f"--- Epoch {epoch} Summary ---")
         print(f"Total Episodes: {episode_counter} | Epoch Avg Len: {avg_len:.1f} | Epoch Avg Ret: {avg_ret:.2f} | Global Avg Ret: {global_avg:.2f} | Time: {(time.time()-start):01.2f}")
         # batching seems to prevent proper training, so I've taken it out for the moment
-        ppo.update(merged_data)
-        #ppo.update_batched(merged_data, batch_size=batch_size)
+        #ppo.update(merged_data)
+        ppo.update_batched(merged_data, batch_size=batch_size)
         
         # Save model weights based on user configs
         current_epoch = epoch + 1 + load_epoch
