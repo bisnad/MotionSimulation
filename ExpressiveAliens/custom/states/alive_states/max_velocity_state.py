@@ -42,11 +42,11 @@ class MaxVelocityState(CustomState):
         # debug
         if linear_speed > self.max_linear_speed2 :
             self.max_linear_speed2  = linear_speed
-            print("max_lin ", self.max_linear_speed2)
+            #print("max_lin ", self.max_linear_speed2)
             
         if angular_speed > self.max_angular_speed2 :
             self.max_angular_speed2  = angular_speed
-            print("max_ang ", self.max_angular_speed2)
+            #print("max_ang ", self.max_angular_speed2)
         
 
         if linear_speed > self.max_linear_speed :

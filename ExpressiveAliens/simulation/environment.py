@@ -60,7 +60,8 @@ class Environment(gym.Env):
                 self.physics = bullet_client.BulletClient(connection_mode=pybullet.GUI)
                 self.camera = Camera(self.physics)
             else:
-                self.physics = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
+                #self.physics = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
+                self.physics = bullet_client.BulletClient()
             
             self.physics.resetSimulation()
             self.physics.setGravity(0, 0, -9.81)
