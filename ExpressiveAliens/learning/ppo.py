@@ -117,7 +117,8 @@ class PPO:
         clipped_ratio = torch.clamp(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio)
         loss_pi = -(torch.min(ratio * adv, clipped_ratio * adv)).mean()
 
-        approx_kl = (logp_old - logp).mean().item()
+        #approx_kl = (logp_old - logp).mean().item()
+        approx_kl = (0.5 * (logp_old - logp) ** 2).mean().item()
         return loss_pi, approx_kl
 
     def compute_loss_v(self, data):
@@ -157,6 +158,10 @@ class PPO:
         else:
             data = rollout_buffer.get()
 
+        #  Global advantage normalization
+        adv = data['adv']
+        data['adv'] = (adv - adv.mean()) / (adv.std() + 1e-8)
+
         buffer_size = data['obs'].shape[0]
         indices = np.arange(buffer_size)
 
@@ -178,6 +183,9 @@ class PPO:
                 loss_pi, kl = self.compute_loss_pi(mb_data)
                 
                 loss_pi.backward()
+
+                torch.nn.utils.clip_grad_norm_(self.ac.pi.parameters(), max_norm=0.5)
+
                 self.pi_optimizer.step()
                 
                 epoch_kls.append(kl)
