@@ -604,7 +604,8 @@ def train_agent_vectorized(epochs, steps_per_env):
     # Initialize history dictionary exactly like the non-vectorized version
     reward_history = {
         "length": [],
-        "total": []
+        "total": [],
+        "avg": []
     }
     for name in reward_names:
         reward_history[name] = []
@@ -627,6 +628,8 @@ def train_agent_vectorized(epochs, steps_per_env):
 
         epoch_ep_rets = []
         epoch_ep_lens = []
+
+        start = time.time()
 
         for t in range(steps_per_env):
             # 1. PPO Action Selection (Batched across all envs)
@@ -685,6 +688,7 @@ def train_agent_vectorized(epochs, steps_per_env):
 
                     reward_history["length"].append(ep_len[i])
                     reward_history["total"].append(ep_ret[i])
+                    reward_history["avg"].append(avg_reward)
                     for rI, name in enumerate(reward_names):
                         reward_history[name].append(ep_reward_components[i, rI])
 
@@ -725,7 +729,7 @@ def train_agent_vectorized(epochs, steps_per_env):
         global_avg = np.mean(ep_reward_list[-40:]) if len(ep_reward_list) > 0 else 0.0
         
         print(f"--- Epoch {epoch} Summary ---")
-        print(f"Total Episodes: {episode_counter} | Epoch Avg Len: {avg_len:.1f} | Epoch Avg Ret: {avg_ret:.2f} | Global Avg Ret: {global_avg:.2f}")
+        print(f"Total Episodes: {episode_counter} | Epoch Avg Len: {avg_len:.1f} | Epoch Avg Ret: {avg_ret:.2f} | Global Avg Ret: {global_avg:.2f} | Time: {(time.time()-start):01.2f}")
         # batching seems to prevent proper training, so I've taken it out for the moment
         ppo.update(merged_data)
         #ppo.update_batched(merged_data, batch_size=batch_size)
