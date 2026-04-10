@@ -163,6 +163,7 @@ epochs=500
 batch_size=256
 env_count = 4
 steps_per_epoch=5000
+target_kl = 0.02
 start_steps=5000 # number of initial steps when actions are taken randomly rather than from sac model
 update_after=1000 # update step after which training of the sac model starts 
 update_every=50 # once training started, number of steps after which training of model is repeated
@@ -268,6 +269,7 @@ with open(config_path) as json_file:
     epochs = training_config["epochs"]
     batch_size = training_config["batch_size"]
     env_count = training_config["env_count"]
+    target_kl = training_config["target_kl"]
     steps_per_epoch = training_config["steps_per_epoch"]
     start_steps = training_config["start_steps"]
     update_after = training_config["update_after"]
@@ -582,7 +584,7 @@ def export_episode(env, sim_file, reward_file, value_file):
 
 
 # create PPO Model
-ppo = PPO(env_observation_limits, env_action_limits, steps_per_epoch)
+ppo = PPO(env_observation_limits, env_action_limits, steps_per_epoch, target_kl)
 
 # Create one buffer per parallel environment
 steps_per_env = steps_per_epoch // num_envs
