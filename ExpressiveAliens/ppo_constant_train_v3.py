@@ -726,7 +726,9 @@ def train_agent_vectorized(epochs, steps_per_env):
         
         print(f"--- Epoch {epoch} Summary ---")
         print(f"Total Episodes: {episode_counter} | Epoch Avg Len: {avg_len:.1f} | Epoch Avg Ret: {avg_ret:.2f} | Global Avg Ret: {global_avg:.2f}")
-        ppo.update_batched(merged_data, batch_size=batch_size)
+        # batching seems to prevent proper training, so I've taken it out for the moment
+        ppo.update(merged_data)
+        #ppo.update_batched(merged_data, batch_size=batch_size)
         
         # Save model weights based on user configs
         current_epoch = epoch + 1 + load_epoch
