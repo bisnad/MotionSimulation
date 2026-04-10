@@ -61,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_target_dist1.0_move_dist1.0_run9"
+result_file_path = "results/sac_constant_ppo_run1"
 
 """
 configuration: agent
@@ -575,6 +575,7 @@ def train_agent(epochs, steps_per_epoch, render):
     # initialise stored rewards
     reward_history["length"] = []
     reward_history["total"] = []
+    reward_history["avg"] = []
     for reward_name in env.reward_names:
         reward_history[reward_name] = []
 
@@ -598,6 +599,8 @@ def train_agent(epochs, steps_per_epoch, render):
     
     # Main loop: collect experience in env and update/log each epoch
     for t in range(total_steps):
+
+        start = time.time()
         
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
@@ -661,6 +664,7 @@ def train_agent(epochs, steps_per_epoch, render):
             # store final episode rewards
             reward_history["length"].append(ep_len)
             reward_history["total"].append(ep_reward[0])
+            reward_history["avg"].append(avg_reward)
             for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
                 reward_history[reward_name].append(ep_reward[rI+1])
             # reset episode rewards
@@ -669,7 +673,7 @@ def train_agent(epochs, steps_per_epoch, render):
             epoch = (t+1) // steps_per_epoch
             epoch += load_epoch
             #print("Episode: {} Length: {} Walk Dist: {} Reward: Current {} Avg {}".format(episode_counter, ep_len, env.agent.walk_dist, ep_ret, avg_reward))
-            print("Epoch {} Episode: {} Length: {} Reward: Current {} Avg {}".format(epoch, episode_counter, ep_len, ep_ret, avg_reward))
+            print("Epoch {} Episode: {} Length: {} Reward: Current {} Avg {} Time {}".format(epoch, episode_counter, ep_len, ep_ret, avg_reward, (time.time()-start)))
             
             # debug
             # print("target dist: ", env.agent.walk_target_dist) 

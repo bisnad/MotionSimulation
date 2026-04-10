@@ -116,22 +116,26 @@ class SAC(RL):
         # Experience buffer
         self.replay_buffer = SAC_ReplayBuffer(obs_dim=observation_limits.shape[0], act_dim=action_limits.shape[0], size=replay_size)
         
+        # Automatic Entropy Tuning parameters
+        self.target_entropy = -float(action_limits.shape[0])
+        # Learnable temperature parameter initialized to 0 (which means alpha = 1.0 initially)
+        self.log_alpha = torch.zeros(1, requires_grad=True)
+
         # Optimizers for policy and q-function
-        self.set_learning_rates(1e-4, 1e-4)
+        self.set_learning_rates(pi_learning_rate, q_learning_rate)
         
         # Entropy regularization coefficient
         self.alpha=0.1
 
     def set_learning_rates(self, pi_learning_rate, q_learning_rate):
-        self.pi_learning_rate = 1e-4
-        self.q_learning_rate = 1e-4
+        self.pi_learning_rate = pi_learning_rate
+        self.q_learning_rate = q_learning_rate
         
-        # Set up optimizers for policy and q-function
+        # Set up optimizers for policy, q-functions, and entropy temperature
         self.pi_optimizer = torch.optim.Adam(self.ac.pi.parameters(), lr=self.pi_learning_rate)
         self.q_optimizer = torch.optim.Adam(self.q_params, lr=self.q_learning_rate)
+        self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.pi_learning_rate)
 
-    #   alpha (float): Entropy regularization coefficient. (Equivalent to 
-    #   inverse of reward scale in the original SAC paper.)
     def set_alpha(self, alpha):
         self.alpha=alpha
         
@@ -213,7 +217,10 @@ class SAC(RL):
             q1_pi_target = self.ac_target.q1(o2, a2)
             q2_pi_target = self.ac_target.q2(o2, a2)
             q_pi_target = torch.min(q1_pi_target, q2_pi_target)
-            backup = r + self.gamma * (1 - d) * (q_pi_target - self.alpha * logp_a2)
+            
+            # Use dynamically computed alpha for backup
+            alpha = self.log_alpha.exp().detach()
+            backup = r + self.gamma * (1 - d) * (q_pi_target - alpha * logp_a2)
         
         # MSE loss against Bellman backup
         loss_q1 = ((q1 - backup)**2).mean()
@@ -230,13 +237,15 @@ class SAC(RL):
         q2_pi = self.ac.q2(o, pi)
         q_pi = torch.min(q1_pi, q2_pi)
     
-        # Entropy-regularized policy loss
-        loss_pi = (self.alpha * logp_pi - q_pi).mean()
+        # Entropy-regularized policy loss using dynamically computed alpha
+        alpha = self.log_alpha.exp().detach()
+        loss_pi = (alpha * logp_pi - q_pi).mean()
        
-        return loss_pi
+        # Return logp_pi so we can use it to train alpha later
+        return loss_pi, logp_pi
     
     def update(self, data):
-        # First run one gradient descent step for Q1 and Q2
+        # 1. First run one gradient descent step for Q1 and Q2
         self.q_optimizer.zero_grad()
         loss_q = self.compute_loss_q(data)
         loss_q.backward()
@@ -247,23 +256,26 @@ class SAC(RL):
         for p in self.q_params:
             p.requires_grad = False
         
-        # Next run one gradient descent step for pi.
+        # 2. Next run one gradient descent step for pi.
         self.pi_optimizer.zero_grad()
-        loss_pi = self.compute_loss_pi(data)
+        loss_pi, logp_pi = self.compute_loss_pi(data)
         loss_pi.backward()
         self.pi_optimizer.step()
         
         # Unfreeze Q-networks so you can optimize it at next DDPG step.
         for p in self.q_params:
             p.requires_grad = True
-        
-        #print("loss_q ", loss_q, " loss_pi ", loss_pi)
+
+        # 3. Update the temperature parameter (alpha)
+        self.alpha_optimizer.zero_grad()
+        # Alpha loss: move alpha towards the target entropy
+        loss_alpha = -(self.log_alpha * (logp_pi + self.target_entropy).detach()).mean()
+        loss_alpha.backward()
+        self.alpha_optimizer.step()
     
-        # Finally, update target networks by polyak averaging.
+        # 4. Finally, update target networks by polyak averaging.
         with torch.no_grad():
             for p, p_target in zip(self.ac.parameters(), self.ac_target.parameters()):
-                # NB: We use an in-place operations "mul_", "add_" to update target
-                # params, as opposed to "mul" and "add", which would make new tensors.
                 p_target.data.mul_(self.polyak)
                 p_target.data.add_((1 - self.polyak) * p.data)
 

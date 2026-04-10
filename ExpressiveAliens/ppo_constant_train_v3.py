@@ -584,7 +584,7 @@ def export_episode(env, sim_file, reward_file, value_file):
 
 
 # create PPO Model
-ppo = PPO(env_observation_limits, env_action_limits, steps_per_epoch, target_kl)
+ppo = PPO(env_observation_limits, env_action_limits, steps_per_epoch, target_kl=target_kl)
 
 # Create one buffer per parallel environment
 steps_per_env = steps_per_epoch // num_envs
