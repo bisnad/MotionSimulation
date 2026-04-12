@@ -677,34 +677,44 @@ def train_agent_vectorized(epochs, steps_per_env):
                 terminal = d_env[i]
                 
                 if terminal or timeout:
+                    # Bootstrapping
+                    # If the episode timed out (reached 800 steps), we bootstrap the value of o2.
+                    # If it actually died (terminal = True), the future value is strictly 0.
                     if timeout and not terminal:
                         _, last_val, _ = ppo.ac.step(torch.as_tensor(o2[i], dtype=torch.float32))
                     else:
                         last_val = 0.0
-
+                        
                     ppo_buffers[i].finish_path(last_val)
-
+                    
+                    # MODIFICATION: Logging history when an episode completes
                     episode_counter += 1
                     ep_reward_list.append(ep_ret[i])
                     avg_reward = np.mean(ep_reward_list[-40:])
-
+                    
+                    # Save core stats
                     reward_history["length"].append(ep_len[i])
                     reward_history["total"].append(ep_ret[i])
-                    reward_history["avg"].append(avg_reward)
+                    
+                    # Save individual reward components
                     for rI, name in enumerate(reward_names):
                         reward_history[name].append(ep_reward_components[i, rI])
-
+                        
+                    print(f"Epoch {epoch} | Env {i} | Ep {episode_counter} | Len {ep_len[i]} | Ret {ep_ret[i]:.2f} | Avg {avg_reward:.2f}")
+                    
                     # IMPORTANT: explicitly reset this finished environment
                     randomise_target_pos(i)
                     reset_out = envs.envs[i].reset()
+                    
                     if isinstance(reset_out, tuple):
                         o2[i] = reset_out[0]
                     else:
                         o2[i] = reset_out
-
+                        
+                    # Reset trackers
                     ep_ret[i] = 0.0
                     ep_len[i] = 0.0
-                    ep_reward_components[i] = 0.0
+                    ep_reward_components[i] = 0.0 
 
             o = o2
             
