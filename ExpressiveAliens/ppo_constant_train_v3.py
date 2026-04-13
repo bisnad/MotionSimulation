@@ -696,6 +696,10 @@ def train_agent_vectorized(epochs, steps_per_env):
                     reward_history["length"].append(ep_len[i])
                     reward_history["total"].append(ep_ret[i])
                     
+                    epoch_ep_lens.append(ep_len[i])
+                    epoch_ep_rets.append(ep_ret[i])
+
+                    
                     # Save individual reward components
                     for rI, name in enumerate(reward_names):
                         reward_history[name].append(ep_reward_components[i, rI])
