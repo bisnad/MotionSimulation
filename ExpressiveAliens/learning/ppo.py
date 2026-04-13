@@ -145,73 +145,129 @@ class PPO:
             loss_v.backward()
             self.v_optimizer.step()
 
-    def update_batched(self, rollout_buffer, batch_size=256):
-        """
-        Perform multiple epochs of training on the batch collected in the Rollout Buffer.
-        Uses Mini-batching for significantly faster and more stable learning.
-        Early stopping is evaluated per-epoch (averaged across mini-batches) to prevent 
-        noisy mini-batches from falsely triggering the KL cutoff.
-        """
-        # Allow passing a dictionary directly (useful for vectorized environments merging data)
+    def update_batched(self, rollout_buffer, batch_size=2048):
         if isinstance(rollout_buffer, dict):
             data = rollout_buffer
         else:
             data = rollout_buffer.get()
 
-        #  Global advantage normalization
+        # Global advantage normalization
         adv = data['adv']
         data['adv'] = (adv - adv.mean()) / (adv.std() + 1e-8)
 
         buffer_size = data['obs'].shape[0]
         indices = np.arange(buffer_size)
 
-        # ---------------------------------------------------------
-        # 1. Train the Actor Policy with MINI-BATCHES
-        # ---------------------------------------------------------
-        for i in range(self.train_pi_iters):
+        # Reduce max epochs for batched training (10 is standard for PPO)
+        batched_pi_iters = 10 
+        batched_v_iters = 10
+
+        # --- Train Actor ---
+        for i in range(batched_pi_iters):
             np.random.shuffle(indices)
-            epoch_kls = []
+            kl_exceeded = False
             
             for start in range(0, buffer_size, batch_size):
                 end = start + batch_size
                 mb_indices = indices[start:end]
-                
-                # Extract mini-batch data
                 mb_data = {k: v[mb_indices] for k, v in data.items()}
                 
                 self.pi_optimizer.zero_grad()
                 loss_pi, kl = self.compute_loss_pi(mb_data)
                 
+                # EMERGENCY BRAKE: Check KL immediately on the current mini-batch
+                if kl > 1.5 * self.target_kl:
+                    print(f"Early stopping at epoch {i} due to max kl ({kl:.4f}).")
+                    kl_exceeded = True
+                    break # Break inner mini-batch loop
+                
                 loss_pi.backward()
-
                 torch.nn.utils.clip_grad_norm_(self.ac.pi.parameters(), max_norm=0.5)
-
                 self.pi_optimizer.step()
                 
-                epoch_kls.append(kl)
-                
-            # EARLY STOPPING: Check average KL divergence after the full epoch
-            avg_kl = np.mean(epoch_kls)
-            if avg_kl > 1.5 * self.target_kl:
-                print(f"Early stopping at actor epoch {i} due to reaching max kl ({avg_kl:.4f}).")
-                break
+            if kl_exceeded:
+                break # Break outer epoch loop as well
 
-        # ---------------------------------------------------------
-        # 2. Train the Critic Value Function with MINI-BATCHES
-        # ---------------------------------------------------------
-        for i in range(self.train_v_iters):
+        # --- Train Critic ---
+        for i in range(batched_v_iters):
             np.random.shuffle(indices)
-            
             for start in range(0, buffer_size, batch_size):
                 end = start + batch_size
                 mb_indices = indices[start:end]
-                
                 mb_data = {k: v[mb_indices] for k, v in data.items()}
                 
                 self.v_optimizer.zero_grad()
                 loss_v = self.compute_loss_v(mb_data)
                 loss_v.backward()
                 self.v_optimizer.step()
+
+    # def update_batched(self, rollout_buffer, batch_size=256):
+    #     """
+    #     Perform multiple epochs of training on the batch collected in the Rollout Buffer.
+    #     Uses Mini-batching for significantly faster and more stable learning.
+    #     Early stopping is evaluated per-epoch (averaged across mini-batches) to prevent 
+    #     noisy mini-batches from falsely triggering the KL cutoff.
+    #     """
+    #     # Allow passing a dictionary directly (useful for vectorized environments merging data)
+    #     if isinstance(rollout_buffer, dict):
+    #         data = rollout_buffer
+    #     else:
+    #         data = rollout_buffer.get()
+
+    #     #  Global advantage normalization
+    #     adv = data['adv']
+    #     data['adv'] = (adv - adv.mean()) / (adv.std() + 1e-8)
+
+    #     buffer_size = data['obs'].shape[0]
+    #     indices = np.arange(buffer_size)
+
+    #     # ---------------------------------------------------------
+    #     # 1. Train the Actor Policy with MINI-BATCHES
+    #     # ---------------------------------------------------------
+    #     for i in range(self.train_pi_iters):
+    #         np.random.shuffle(indices)
+    #         epoch_kls = []
+            
+    #         for start in range(0, buffer_size, batch_size):
+    #             end = start + batch_size
+    #             mb_indices = indices[start:end]
+                
+    #             # Extract mini-batch data
+    #             mb_data = {k: v[mb_indices] for k, v in data.items()}
+                
+    #             self.pi_optimizer.zero_grad()
+    #             loss_pi, kl = self.compute_loss_pi(mb_data)
+                
+    #             loss_pi.backward()
+
+    #             torch.nn.utils.clip_grad_norm_(self.ac.pi.parameters(), max_norm=0.5)
+
+    #             self.pi_optimizer.step()
+                
+    #             epoch_kls.append(kl)
+                
+    #         # EARLY STOPPING: Check average KL divergence after the full epoch
+    #         avg_kl = np.mean(epoch_kls)
+    #         if avg_kl > 1.5 * self.target_kl:
+    #             print(f"Early stopping at actor epoch {i} due to reaching max kl ({avg_kl:.4f}).")
+    #             break
+
+    #     # ---------------------------------------------------------
+    #     # 2. Train the Critic Value Function with MINI-BATCHES
+    #     # ---------------------------------------------------------
+    #     for i in range(self.train_v_iters):
+    #         np.random.shuffle(indices)
+            
+    #         for start in range(0, buffer_size, batch_size):
+    #             end = start + batch_size
+    #             mb_indices = indices[start:end]
+                
+    #             mb_data = {k: v[mb_indices] for k, v in data.items()}
+                
+    #             self.v_optimizer.zero_grad()
+    #             loss_v = self.compute_loss_v(mb_data)
+    #             loss_v.backward()
+    #             self.v_optimizer.step()
 
     def load_models(self, file_path, epoch=0):
         pi_model_full_file_name = "{}/ppo_pi_epoch_{}.pth".format(file_path, epoch)
