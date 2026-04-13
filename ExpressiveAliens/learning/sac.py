@@ -95,15 +95,17 @@ class SAC_MLPActorCritic(nn.Module):
     def act(self, obs, deterministic=False):
         with torch.no_grad():
             a, _ = self.pi.forward(obs, deterministic=deterministic, with_logprob=False)
-            return a.numpy()
-
+            return a.cpu().numpy()
+            
 class SAC(RL):
     def __init__(self, observation_limits, action_limits, replay_size, mlp_hidden_sizes, mpl_activation, pi_learning_rate, q_learning_rate):
         super(SAC, self).__init__(observation_limits, action_limits, replay_size)
+
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
         # Create actor-critic
-        self.ac = SAC_MLPActorCritic(self.observation_limits, self.action_limits, mlp_hidden_sizes, mpl_activation)
-        self.ac_target = deepcopy(self.ac)
+        self.ac = SAC_MLPActorCritic(self.observation_limits, self.action_limits, mlp_hidden_sizes, mpl_activation).to(self.device)
+        self.ac_target = deepcopy(self.ac).to(self.device)
         
         # Freeze target networks with respect to optimizers (only update via polyak averaging)
         self.polyak = 0.995
@@ -119,7 +121,7 @@ class SAC(RL):
         # Automatic Entropy Tuning parameters
         self.target_entropy = -float(action_limits.shape[0])
         # Learnable temperature parameter initialized to 0 (which means alpha = 1.0 initially)
-        self.log_alpha = torch.zeros(1, requires_grad=True)
+        self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
 
         # Optimizers for policy and q-function
         self.set_learning_rates(pi_learning_rate, q_learning_rate)
@@ -280,7 +282,8 @@ class SAC(RL):
                 p_target.data.add_((1 - self.polyak) * p.data)
 
     def get_action(self, o, deterministic=False):
-        return self.ac.act(torch.as_tensor(o, dtype=torch.float32), deterministic)
+        obs_tensor = torch.as_tensor(o, dtype=torch.float32).to(self.device)
+        return self.ac.act(obs_tensor, deterministic)
     
     def store_experience(self, o, a, r, o2, d):
         self.replay_buffer.store(o, a, r, o2, d)
@@ -288,4 +291,5 @@ class SAC(RL):
     def replay_experience(self):
         for i in range(self.replay_count):
             batch = self.replay_buffer.sample_batch(self.batch_size)
+            batch = {k: v.to(self.device) for k, v in batch.items()}
             self.update(data=batch)
