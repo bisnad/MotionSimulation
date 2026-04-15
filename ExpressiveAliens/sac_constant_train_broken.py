@@ -61,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_sac_run1_2"
+result_file_path = "results/biped_constant_sac_run1_3"
 
 """
 configuration: agent
@@ -143,8 +143,6 @@ agent_flow_effort_max_value = 20000.0
 configuration: model
 """
 
-sac_pi_learning_rate = 1e-4
-sac_q_learning_rate = 1e-4
 sac_replay_size = int(1e6)
 sac_hidden_sizes=(256, 256, 256)
 sac_activation=nn.ReLU
@@ -153,12 +151,31 @@ sac_activation=nn.ReLU
 configuration: training
 """
 
-epochs=500
-steps_per_epoch=5000
-start_steps=5000 # number of initial steps when actions are taken randomly rather than from sac model
-update_after=1000 # update step after which training of the sac model starts 
-update_every=50 # once training started, number of steps after which training of model is repeated
-max_ep_len=800 # Maximum length of trajectory / episode / rollout.
+epochs = 1000
+steps_per_epoch = 5000
+start_steps = 5000
+update_after = 1000
+update_every = 50
+max_ep_len = 800
+
+sac_pi_learning_rate = 1e-5
+sac_q_learning_rate = 1e-4
+sac_auto_entropy = True
+sac_init_alpha = 0.1
+sac_target_entropy = None
+sac_reward_scale = 1.0
+sac_reward_clip = 10.0
+sac_target_q_clip = 100.0
+steps_per_epoch = 5000
+start_steps = 5000
+update_after = 1000
+update_every = 50
+max_ep_len = 800
+
+lr_decay_enabled = False
+lr_decay_gamma = 0.9995
+min_pi_learning_rate = 1e-6
+min_q_learning_rate = 1e-5
 
 """
 configuration: visualization
@@ -253,8 +270,6 @@ with open(config_path) as json_file:
     
     # model settings 
     model_config = config_data["model"]
-    sac_pi_learning_rate = model_config["sac_pi_learning_rate"]
-    sac_q_learning_rate = model_config["sac_q_learning_rate"]
     sac_replay_size = int(model_config["sac_replay_size"])
     sac_hidden_sizes= model_config["sac_hidden_sizes"]
     
@@ -266,7 +281,24 @@ with open(config_path) as json_file:
     update_after = training_config["update_after"]
     update_every = training_config["update_every"]
     max_ep_len = training_config["max_ep_len"]
-    
+
+    sac_pi_learning_rate = training_config.get("sac_pi_learning_rate", 1e-5)
+    sac_q_learning_rate = training_config.get("sac_q_learning_rate", 1e-4)
+
+    sac_auto_entropy = training_config.get("auto_entropy", True)
+    sac_init_alpha = training_config.get("sac_init_alpha", 0.1)
+    sac_target_entropy = training_config.get("sac_target_entropy", None)
+
+    sac_reward_scale = training_config.get("sac_reward_scale", 1.0)
+    sac_reward_clip = training_config.get("sac_reward_clip", 10.0)
+    sac_target_q_clip = training_config.get("sac_target_q_clip", 100.0)
+
+    lr_decay_config = training_config.get("lr_decay", {})
+    lr_decay_enabled = lr_decay_config.get("enabled", False)
+    lr_decay_gamma = lr_decay_config.get("gamma", 0.9995)
+    min_pi_learning_rate = lr_decay_config.get("min_pi_learning_rate", 1e-6)
+    min_q_learning_rate = lr_decay_config.get("min_q_learning_rate", 1e-5)
+
     # visualisation settings
     render_config = config_data["visualization"]
     render = render_config["render"]
@@ -454,7 +486,28 @@ env_action_limits = np.stack( [env_action_space.low, env_action_space.high], axi
 from learning.sac import SAC
 
 # create SAC Model
-sac = SAC(env_observation_limits, env_action_limits, sac_replay_size, sac_hidden_sizes, sac_activation, sac_pi_learning_rate, sac_q_learning_rate)
+sac = SAC(
+    env_observation_limits,
+    env_action_limits,
+    sac_replay_size,
+    sac_hidden_sizes,
+    sac_activation,
+    sac_pi_learning_rate,
+    sac_q_learning_rate,
+    auto_entropy=sac_auto_entropy,
+    init_alpha=sac_init_alpha,
+    target_entropy=sac_target_entropy,
+    reward_scale=sac_reward_scale,
+    reward_clip=sac_reward_clip,
+    target_q_clip=sac_target_q_clip
+)
+
+sac.configure_lr_decay(
+    enabled=lr_decay_enabled,
+    gamma=lr_decay_gamma,
+    min_pi_learning_rate=min_pi_learning_rate,
+    min_q_learning_rate=min_q_learning_rate
+)
 
 # load model weights and replay buffer
 if load_model_weights:
@@ -588,11 +641,7 @@ def train_agent(epochs, steps_per_epoch, render):
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
-    
-    """
-    if render:
-        env.render() # call this before env.reset, if you want a window showing the environment
-    """
+    episode_start_time = time.time()
     
     randomise_target_pos()
     o, ep_ret, ep_len = env.reset(), 0, 0
@@ -659,33 +708,32 @@ def train_agent(epochs, steps_per_epoch, render):
             ep_reward_list.append(ep_ret)
             avg_reward_list.append(avg_reward)
             
-            # store final episode rewards
             reward_history["length"].append(ep_len)
             reward_history["total"].append(ep_reward[0])
-            reward_history["avg"].append(avg_reward)
             for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
                 reward_history[reward_name].append(ep_reward[rI+1])
-            # reset episode rewards
+
             ep_reward = [0.0] * (len(env.rewards) + 1)
 
             epoch = (t+1) // steps_per_epoch
             epoch += load_epoch
-            #print("Episode: {} Length: {} Walk Dist: {} Reward: Current {} Avg {}".format(episode_counter, ep_len, env.agent.walk_dist, ep_ret, avg_reward))
-            print("Epoch {} Episode: {} Length: {} Reward: Current {} Avg {} Time {}".format(epoch, episode_counter, ep_len, ep_ret, avg_reward, (time.time()-start_time)))
-            
-            # debug
-            # print("target dist: ", env.agent.walk_target_dist) 
-            
-            #print("er ", ep_ret, " el ", ep_len, " a ", a)
+
+            elapsed_time = time.time() - episode_start_time
+
+            print(
+                "Epoch {} Episode: {} Length: {} Reward: Current {} Avg {} Time {:.2f}".format(
+                    epoch, episode_counter, ep_len, ep_ret, avg_reward, elapsed_time
+                )
+            )
+
             randomise_target_pos()
             o, ep_ret, ep_len = env.reset(), 0, 0
-
-            start_time = time.time()
-            
+            episode_start_time = time.time()
                 
         # Update handling
         if t >= update_after and t % update_every == 0:
             sac.replay_experience()
+            sac.step_lr_schedulers()
 
     
         # End of epoch handling
