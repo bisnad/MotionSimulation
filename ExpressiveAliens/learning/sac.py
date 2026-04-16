@@ -59,9 +59,11 @@ class SAC_SquashedGaussianMLPActor(nn.Module):
         else:
             logp_pi = None
 
-        pi_action = torch.sigmoid(pi_action)
-        pi_action = self.act_limit_range * pi_action
-        pi_action = self.act_limit_low + pi_action
+        pi_action = torch.tanh(pi_action)
+        # Tanh maps to [-1, 1], so scale and shift accordingly to fit [low, high]
+        scale = self.act_limit_range / 2.0
+        shift = self.act_limit_low + scale
+        pi_action = pi_action * scale + shift
     
         return pi_action, logp_pi
     

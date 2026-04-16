@@ -653,14 +653,10 @@ def train_agent(epochs, steps_per_epoch, render):
         # End of trajectory handling
         if d or (ep_len == max_ep_len):
             episode_counter += 1
-
+            
+            avg_reward = np.mean(ep_reward_list[-40:])
+            
             ep_reward_list.append(ep_ret)
-
-            if len(ep_reward_list) > 0:
-                avg_reward = np.mean(ep_reward_list[-40:])
-            else:
-                avg_reward = ep_ret
-
             avg_reward_list.append(avg_reward)
             
             # store final episode rewards
