@@ -44,12 +44,12 @@ from custom.rewards.body_velocity_alignment_reward import BodyVelocityAlignmentR
 from custom.rewards.feet_collision_reward import FeetCollisionReward
 from custom.rewards.joint_reward import JointReward
 from custom.rewards.move_distance_reward import MoveDistanceReward
+from custom.rewards.move_to_target_reward import MoveToTargetReward
 from custom.rewards.impulse_reward import ImpulseReward
 from custom.rewards.weight_effort_reward import WeightEffortReward
 from custom.rewards.time_effort_reward import TimeEffortReward
 from custom.rewards.space_effort_reward import SpaceEffortReward
 from custom.rewards.flow_effort_reward import FlowEffortReward
-from custom.rewards.target_distance_reward import TargetDistanceReward
 from custom.rewards.ground_contact_reward import GroundContactReward
 
 # custom environment
@@ -61,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_control_sac_v2_run1"
+result_file_path = "results/biped_constant_sac_v2_run7"
 
 """
 configuration: agent
@@ -120,8 +120,8 @@ agent_body_misalignment_reward_scale = 0.0
 # movement distance
 agent_move_distance_reward_scale = 0.0
 
-# target distance
-agent_target_distance_reward_scale = 0.0
+# movement to target
+agent_move_to_target_reward_scale = 0.0
 
 # weight effort
 agent_weight_effort_target_value = 0.0
@@ -239,8 +239,8 @@ with open(config_path) as json_file:
     agent_ground_contact_cost = rewards_config["agent_ground_contact_cost"]
 
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
-    
-    agent_target_distance_reward_scale = rewards_config["agent_target_distance_reward_scale"]
+
+    agent_move_to_target_reward_scale = rewards_config["agent_move_to_target_reward_scale"]
 
     agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
     agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
@@ -356,12 +356,14 @@ bodyTargetState = BodyTargetState()
 agent.add_state(bodyTargetState, "bodyTarget")
 
 # agent alive state
+
 """
 # agent stops being alive when non feet in contact with ground
 aliveState = GroundContactAliveState()
 aliveState.feet_names = agent_feet_names
 agent.add_alive_state(aliveState, "alive")
 """
+
 # agent stops being alive when its root link moves too fast
 aliveState2 = MaxVelocityState()
 aliveState2.max_linear_speed = 10.0
@@ -403,8 +405,8 @@ bodyVelocityAlignmentReward.reward_scale = agent_body_misalignment_reward_scale
 moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
-targetDistanceReward = TargetDistanceReward()
-targetDistanceReward.reward_scale  = agent_target_distance_reward_scale
+moveToTargetReward = MoveToTargetReward()
+moveToTargetReward.reward_scale  = agent_move_to_target_reward_scale
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
@@ -432,7 +434,7 @@ env.add_reward(feetCollisionReward, "feet")
 env.add_reward(groundContactReward, "ground")
 env.add_reward(bodyVelocityAlignmentReward, "vel_align")
 env.add_reward(moveDistanceReward, "move_dist")
-env.add_reward(targetDistanceReward, "target_dist")
+env.add_reward(moveToTargetReward, "move_target")
 env.add_reward(weightEffortReward, "weight_effort")
 env.add_reward(timeEffortReward, "time_effort")
 env.add_reward(spaceEffortReward, "space_effort")
