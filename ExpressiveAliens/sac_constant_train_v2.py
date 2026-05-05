@@ -44,7 +44,7 @@ from custom.rewards.body_velocity_alignment_reward import BodyVelocityAlignmentR
 from custom.rewards.feet_collision_reward import FeetCollisionReward
 from custom.rewards.joint_reward import JointReward
 from custom.rewards.move_distance_reward import MoveDistanceReward
-from custom.rewards.target_alignment_reward import TargetAlignmentReward
+from custom.rewards.target_alignment_reward_v2 import TargetAlignmentReward
 from custom.rewards.impulse_reward import ImpulseReward
 from custom.rewards.weight_effort_reward import WeightEffortReward
 from custom.rewards.time_effort_reward import TimeEffortReward
@@ -61,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_sac_v2_run11"
+result_file_path = "results/biped_constant_sac_v2_run13"
 
 """
 configuration: agent
@@ -121,7 +121,7 @@ agent_body_misalignment_reward_scale = 0.0
 agent_move_distance_reward_scale = 0.0
 
 # target alignment
-agent_target_align_reward_scale = 0.0
+agent_target_misalignment_reward_scale = 0.0
 
 # weight effort
 agent_weight_effort_target_value = 0.0
@@ -240,7 +240,7 @@ with open(config_path) as json_file:
 
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
 
-    agent_target_align_reward_scale = rewards_config["agent_target_align_reward_scale"]
+    agent_target_misalignment_reward_scale = rewards_config["agent_target_misalignment_reward_scale"]
 
     agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
     agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
@@ -406,7 +406,7 @@ moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
 targetAlignmentReward = TargetAlignmentReward()
-targetAlignmentReward.reward_scale  = agent_target_align_reward_scale
+targetAlignmentReward.misalignment_cost  = agent_target_misalignment_reward_scale
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
