@@ -1,77 +1,99 @@
 from custom.rewards.custom_reward import CustomReward
-from simulation.utils import Utils
 import numpy as np
 
 
 class MoveToTargetReward(CustomReward):
-    def __init__(self):
+    """
+    Continuing-task reward:
+    - Outside the target radius:
+        positive for movement toward target,
+        near zero for sideways motion,
+        negative for motion away from target.
+    - Inside the target radius:
+        rewards standing still,
+        penalizes motion,
+        optionally penalizes drifting away from the target center.
+    """
+
+    def __init__(
+        self,
+        target_radius=0.10,
+        approach_scale=1.0,
+        stillness_scale=1.0,
+        drift_scale=0.5,
+        inside_target_bonus=0.5,
+        only_positive_approach=False,
+    ):
         super().__init__()
 
-        self.prev_agent_pos = None
+        self.target_radius = float(target_radius)
+        self.approach_scale = float(approach_scale)
+        self.stillness_scale = float(stillness_scale)
+        self.drift_scale = float(drift_scale)
+        self.inside_target_bonus = float(inside_target_bonus)
+        self.only_positive_approach = bool(only_positive_approach)
 
-        # approach reward
-        self.dir_dist_cost = 1.0
-
-        # goal / hold behavior
-        self.goal_radius = 0.15
-        self.goal_bonus = 1.0
-        self.stay_bonus = 0.5
-        self.leave_penalty = 1.0
-        self.stillness_cost = 0.5
+        self.prev_body_pos_xy = None
+        self.value = 0.0
 
     def reset(self):
-        self.prev_agent_pos = None
+        self.prev_body_pos_xy = None
         self.value = 0.0
 
     def calc_value(self):
-        agent_pos = np.array(Utils.average_body_position(self.env.agent), dtype=np.float32)
-        target_pos = np.array(Utils.average_body_position(self.env.target), dtype=np.float32)
+        agent = self.env.agent
+        target = self.env.target
 
-        agent_xy = agent_pos[:2]
-        target_xy = target_pos[:2]
+        agent_body_pose = agent.body.get_pose()
+        target_body_pose = target.body.get_pose()
 
-        if self.prev_agent_pos is None:
-            self.prev_agent_pos = agent_pos
+        agent_pos_xy = np.array(
+            [agent_body_pose[0], agent_body_pose[1]],
+            dtype=np.float32
+        )
+        target_pos_xy = np.array(
+            [target_body_pose[0], target_body_pose[1]],
+            dtype=np.float32
+        )
+
+        dt = float(self.env.sim_time_step * self.env.sim_sub_steps)
+        if dt <= 0.0:
             self.value = 0.0
             return
 
-        prev_xy = np.array(self.prev_agent_pos[:2], dtype=np.float32)
+        if self.prev_body_pos_xy is None:
+            self.prev_body_pos_xy = agent_pos_xy.copy()
+            self.value = 0.0
+            return
 
-        move_vec = agent_xy - prev_xy
-        move_dist = np.linalg.norm(move_vec)
+        delta_xy = agent_pos_xy - self.prev_body_pos_xy
+        self.prev_body_pos_xy = agent_pos_xy.copy()
 
-        to_target_vec = target_xy - agent_xy
-        target_dist = np.linalg.norm(to_target_vec)
+        move_velocity_xy = delta_xy / dt
+        speed = np.linalg.norm(move_velocity_xy)
 
-        prev_target_dist = np.linalg.norm(target_xy - prev_xy)
+        to_target_vec = target_pos_xy - agent_pos_xy
+        dist_to_target = np.linalg.norm(to_target_vec)
 
-        reward = 0.0
+        # Outside target region: reward motion toward target
+        if dist_to_target > self.target_radius:
+            if dist_to_target < 1e-8:
+                self.value = 0.0
+                return
 
-        # Case 1: inside goal region -> reward staying there
-        if target_dist <= self.goal_radius:
-            reward += self.goal_bonus
+            to_target_dir = to_target_vec / (dist_to_target + 1e-8)
+            projected_speed_toward_target = np.dot(move_velocity_xy, to_target_dir)
 
-            # reward staying close to center of target region
-            proximity = 1.0 - (target_dist / (self.goal_radius + 1e-8))
-            reward += self.stay_bonus * proximity
+            reward = self.approach_scale * projected_speed_toward_target
 
-            # penalize unnecessary movement while inside goal region
-            reward -= self.stillness_cost * move_dist
+            if self.only_positive_approach:
+                reward = max(0.0, reward)
 
-            # extra penalty if agent was in goal region and moved farther away
-            if prev_target_dist <= self.goal_radius and target_dist > prev_target_dist:
-                reward -= self.leave_penalty * (target_dist - prev_target_dist)
+            self.value = reward
+            return
 
-        # Case 2: outside goal region -> directional movement reward
-        else:
-            if move_dist > 1e-8:
-                move_dir = move_vec / move_dist
-                target_dir = to_target_vec / (target_dist + 1e-8)
-                alignment = float(np.dot(move_dir, target_dir))
-                reward += self.dir_dist_cost * alignment * move_dist
-
-            # optional small progress shaping
-            reward += (prev_target_dist - target_dist)
-
-        self.value = reward
-        self.prev_agent_pos = agent_pos
+        # Inside target region: reward standing still
+        # Higher reward when speed is low
+        stillness_reward = self.stillness_scale * max(0.0, 1.0 - speed)
+        center_reward = self.inside_target_bonus - self.drift_scale * dist_to_target
+        self.value = stillness_reward + center_reward

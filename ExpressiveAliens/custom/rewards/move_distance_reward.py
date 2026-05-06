@@ -23,8 +23,8 @@ class MoveDistanceReward(CustomReward):
 
         # calculate walk distance
         if self.body_pos is not None:
-            old_pos_xy = np.array(self.body_pos[0], self.body_pos[1])
-            new_pos_xy = np.array(body_pos[0], body_pos[1])
+            old_pos_xy = np.array([self.body_pos[0], self.body_pos[1]], dtype=np.float32)
+            new_pos_xy = np.array([body_pos[0], body_pos[1]], dtype=np.float32)
             self.move_distance = np.linalg.norm(new_pos_xy-old_pos_xy) / (self.env.sim_time_step * self.env.sim_sub_steps)
         
             #print("old_pos_xy ", old_pos_xy)
