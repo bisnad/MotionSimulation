@@ -43,6 +43,7 @@ from custom.rewards.body_velocity_alignment_reward import BodyVelocityAlignmentR
 from custom.rewards.feet_collision_reward import FeetCollisionReward
 from custom.rewards.joint_reward import JointReward
 from custom.rewards.move_distance_reward import MoveDistanceReward
+from custom.rewards.move_to_target_reward import MoveToTargetReward
 from custom.rewards.impulse_reward import ImpulseReward
 from custom.rewards.weight_effort_reward import WeightEffortReward
 from custom.rewards.time_effort_reward import TimeEffortReward
@@ -60,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_target_dist1.0_move_dist1.0_controls_run9"
+result_file_path = "results/biped_control_sac_v2_run17"
 
 """
 configuration: agent
@@ -81,6 +82,10 @@ target_min_center_dist = 4.
 target_max_center_dist = 10.
 target_reset_when_agent_close = True
 target_reset_agent_max_distance = 0.5
+
+target_move_reward_threshold = 200
+target_speed_increment = 0.0001
+target_max_speed = 0.05
 
 """
 configuration: agent costs and rewards
@@ -115,8 +120,9 @@ agent_body_misalignment_reward_scale = 0.0
 # movement distance
 agent_move_distance_reward_scale = 0.0
 
-# target distance
-agent_target_distance_reward_scale = 0.0
+# move to target
+agent_move_to_target_reward_scale = 1.0
+agent_stay_at_target_reward_scale = 1.0
 
 # weight effort
 agent_weight_effort_target_value = 0.0
@@ -208,6 +214,9 @@ with open(config_path) as json_file:
     target_max_center_dist = target_config["target_max_center_dist"]
     target_reset_when_agent_close = target_config["target_reset_when_agent_close"]
     target_reset_agent_max_distance = target_config["target_reset_agent_max_distance"]
+    target_move_reward_threshold = target_config["target_move_reward_threshold"]
+    target_speed_increment = target_config["target_speed_increment"]
+    target_max_speed = target_config["target_max_speed"]
 
     # agent cost and rewards
     rewards_config = config_data["reward"]
@@ -232,7 +241,8 @@ with open(config_path) as json_file:
 
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
     
-    agent_target_distance_reward_scale = rewards_config["agent_target_distance_reward_scale"]
+    agent_move_to_target_reward_scale = rewards_config["agent_move_to_target_reward_scale"]
+    agent_stay_at_target_reward_scale = rewards_config["agent_stay_at_target_reward_scale"]
 
     agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
     agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
@@ -401,8 +411,9 @@ bodyVelocityAlignmentReward.reward_scale = agent_body_misalignment_reward_scale
 moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
-targetDistanceReward = TargetDistanceReward()
-targetDistanceReward.reward_scale  = agent_target_distance_reward_scale
+moveToTargetReward = MoveToTargetReward()
+moveDistanceReward.approach_scale = agent_move_to_target_reward_scale
+moveDistanceReward.stillness_scale = agent_stay_at_target_reward_scale
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
@@ -430,7 +441,7 @@ env.add_reward(feetCollisionReward, "feet")
 env.add_reward(groundContactReward, "ground")
 env.add_reward(bodyVelocityAlignmentReward, "vel_align")
 env.add_reward(moveDistanceReward, "move_dist")
-env.add_reward(targetDistanceReward, "target_dist")
+env.add_reward(moveToTargetReward, "move_to_target")
 env.add_reward(weightEffortReward, "weight_effort")
 env.add_reward(timeEffortReward, "time_effort")
 env.add_reward(spaceEffortReward, "space_effort")
@@ -629,6 +640,7 @@ def train_agent(epochs, steps_per_epoch, render):
     # initialise stored rewards
     reward_history["length"] = []
     reward_history["total"] = []
+    reward_history["avg"] = []
     for reward_name in env.reward_names:
         reward_history[reward_name] = []
 
@@ -641,6 +653,10 @@ def train_agent(epochs, steps_per_epoch, render):
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
+    
+    # Variables for smooth target movement curriculum
+    target_velocity = np.array([0.0, 0.0])
+    base_target_speed = 0.0
     
     """
     if render:
@@ -671,26 +687,53 @@ def train_agent(epochs, steps_per_epoch, render):
         ep_reward[0] += r
         for rI, reward in enumerate(env.rewards):
             ep_reward[rI+1] += reward.reward
+
+        # Curriculum Learning: Update the target's speed based on agent's competence
+        # Adjust the '200' threshold and '0.05' max speed based on your environment's reward scale
+        if len(avg_reward_list) > 0 and avg_reward_list[-1] > target_move_reward_threshold:
+            # Gradually increase speed, capped at a maximum
+            base_target_speed = min(target_max_speed, (avg_reward_list[-1] - target_move_reward_threshold) * target_speed_increment)
+        else:
+            base_target_speed = 0.0
             
-        # check if target position needs to be reset
-        if target_reset_when_agent_close == True:
-            agent_pos = Utils.average_body_position(agent)
-            target_pos = Utils.average_body_position(target)
-            target_dist = np.linalg.norm([target_pos[1] - agent_pos[1], target_pos[0] - agent_pos[0]])
+        # Update target position continuously instead of teleporting
+        if base_target_speed > 0:
+            # Occasionally change the target's direction randomly (e.g., 2% chance per step)
+            if random.random() < 0.02 or np.linalg.norm(target_velocity) == 0:
+                rand_angle = random.uniform(0, 2 * math.pi)
+                target_velocity = np.array([math.cos(rand_angle), math.sin(rand_angle)]) * base_target_speed
             
-            #print("agent_pos ", agent_pos, " target_pos ", target_pos, " target_dist ", target_dist, " target_reset_agent_max_distance ", target_reset_agent_max_distance )
+            # Get current target position
+            current_target_pos = target.body.get_position()
             
-            if target_dist < target_reset_agent_max_distance:
-                d = True # immediately end episode
+            # Calculate new position
+            new_x = current_target_pos[0] + target_velocity[0]
+            new_y = current_target_pos[1] + target_velocity[1]
+            
+            # Keep target within bounds (bounce off invisible boundary)
+            if np.linalg.norm([new_x, new_y]) > target_max_center_dist:
+                target_velocity = -target_velocity # reverse direction
+                new_x = current_target_pos[0] + target_velocity[0]
+                new_y = current_target_pos[1] + target_velocity[1]
+                
+            # Apply new position
+            target.body.set_position([new_x, new_y, current_target_pos[2]])
+            
+            # (Optional) If your env has a function to recalculate the observation without stepping,
+            # you would update o2 here so the agent sees the target's exact position for the replay buffer.
+            # Usually, a 1-frame observation lag is acceptable for continuous control.
         
         if render:
             env.render(mode="human")
     
-        # Ignore the "done" signal if it comes from hitting the time horizon
-        d_store = False if ep_len == max_ep_len else d
+        # Ignore the "done" signal if it comes from hitting the time
+        # horizon (that is, when it's an artificial terminal signal
+        # that isn't based on the agent's state)
+        if ep_len == max_ep_len:
+            d = False
     
         # Store experience to replay buffer
-        sac.store_experience(o, a, r, o2, d_store)
+        sac.store_experience(o, a, r, o2, d)
     
         # Super critical, easy to overlook step: make sure to update 
         # most recent observation!
@@ -703,14 +746,21 @@ def train_agent(epochs, steps_per_epoch, render):
         if d or (ep_len == max_ep_len):
             episode_counter += 1
             
-            avg_reward = np.mean(ep_reward_list[-40:]) if len(ep_reward_list) > 0 else 0
-            
+            # Append current episode return BEFORE calculating the moving average
             ep_reward_list.append(ep_ret)
+            
+            if len(ep_reward_list) > 0:
+                avg_reward = np.mean(ep_reward_list[-40:])
+            else:
+                avg_reward = ep_ret
+                
             avg_reward_list.append(avg_reward)
             
             # Store final episode rewards
             reward_history["length"].append(ep_len)
             reward_history["total"].append(ep_reward[0])
+            reward_history["avg"].append(avg_reward)
+            
             for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
                 reward_history[reward_name].append(ep_reward[rI+1])
                 
@@ -719,13 +769,16 @@ def train_agent(epochs, steps_per_epoch, render):
 
             epoch = (t+1) // steps_per_epoch
             epoch += load_epoch
-            print("Epoch {} Episode: {} Length: {} Reward: Current {:.2f} Avg {:.2f}".format(
-                epoch, episode_counter, ep_len, ep_ret, avg_reward))
+            print("Epoch {} Episode: {} Length: {} Reward: Current {:.2f} Avg {:.2f} Time {:.2f}".format(
+                epoch, episode_counter, ep_len, ep_ret, avg_reward, (time.time()-start_time)))
             
             # FIX: Resample the target and reward constraints ONLY at the start of a new episode
             randomise_target_pos()
             randomise_rewards()
             o, ep_ret, ep_len = env.reset(), 0, 0
+            
+            # Reset the time for the next episode
+            start_time = time.time()
             
         # Update handling
         if t >= update_after and t % update_every == 0:
