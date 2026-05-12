@@ -40,6 +40,7 @@ from custom.rewards.body_velocity_alignment_reward import BodyVelocityAlignmentR
 from custom.rewards.feet_collision_reward import FeetCollisionReward
 from custom.rewards.joint_reward import JointReward
 from custom.rewards.move_distance_reward import MoveDistanceReward
+from custom.rewards.move_to_target_reward import MoveToTargetReward
 from custom.rewards.impulse_reward import ImpulseReward
 from custom.rewards.weight_effort_reward import WeightEffortReward
 from custom.rewards.time_effort_reward import TimeEffortReward
@@ -56,7 +57,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_target_dist1.0_move_dist1.0_controls_run9"
+result_file_path = "results/biped_control_sac_v2_run17"
 
 """
 configuration: agent
@@ -77,6 +78,10 @@ target_min_center_dist = 4.
 target_max_center_dist = 10.
 target_reset_when_agent_close = True
 target_reset_agent_max_distance = 0.5
+
+target_move_reward_threshold = 200
+target_speed_increment = 0.0001
+target_max_speed = 0.05
 
 """
 configuration: agent costs and rewards
@@ -111,8 +116,9 @@ agent_body_misalignment_reward_scale = 0.0
 # movement distance
 agent_move_distance_reward_scale = 0.0
 
-# target distance
-agent_target_distance_reward_scale = 0.0
+# move to target
+agent_move_to_target_reward_scale = 1.0
+agent_stay_at_target_reward_scale = 1.0
 
 # weight effort
 agent_weight_effort_target_value = 0.0
@@ -204,6 +210,9 @@ with open(config_path) as json_file:
     target_max_center_dist = target_config["target_max_center_dist"]
     target_reset_when_agent_close = target_config["target_reset_when_agent_close"]
     target_reset_agent_max_distance = target_config["target_reset_agent_max_distance"]
+    target_move_reward_threshold = target_config["target_move_reward_threshold"]
+    target_speed_increment = target_config["target_speed_increment"]
+    target_max_speed = target_config["target_max_speed"]
 
     # agent cost and rewards
     rewards_config = config_data["reward"]
@@ -231,7 +240,8 @@ with open(config_path) as json_file:
     
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
     
-    agent_target_distance_reward_scale = rewards_config["agent_target_distance_reward_scale"]
+    agent_move_to_target_reward_scale = rewards_config["agent_move_to_target_reward_scale"]
+    agent_stay_at_target_reward_scale = rewards_config["agent_stay_at_target_reward_scale"]
     
     agent_weight_effort_target_value = rewards_config["agent_weight_effort_target_value"]
     agent_weight_effort_reward_scale = rewards_config["agent_weight_effort_reward_scale"]
@@ -386,8 +396,9 @@ bodyVelocityAlignmentReward.reward_scale = agent_body_misalignment_reward_scale
 moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
-targetDistanceReward = TargetDistanceReward()
-targetDistanceReward.reward_scale  = agent_target_distance_reward_scale
+moveToTargetReward = MoveToTargetReward()
+moveDistanceReward.approach_scale = agent_move_to_target_reward_scale
+moveDistanceReward.stillness_scale = agent_stay_at_target_reward_scale
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
@@ -415,7 +426,7 @@ env.add_reward(feetCollisionReward, "feet")
 env.add_reward(groundContactReward, "ground")
 env.add_reward(bodyVelocityAlignmentReward, "vel_align")
 env.add_reward(moveDistanceReward, "move_dist")
-env.add_reward(targetDistanceReward, "target_dist")
+env.add_reward(moveToTargetReward, "move_to_target")
 env.add_reward(weightEffortReward, "weight_effort")
 env.add_reward(timeEffortReward, "time_effort")
 env.add_reward(spaceEffortReward, "space_effort")
@@ -537,21 +548,33 @@ def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
 
 def export_episode(env, sim_file, reward_file, value_file):
     
+    # debug
+    closest_target_dist = 10000.0
+    
     episode_rewards = {}
     episode_values = {}
+    episode_values_orig = {}
     
     for reward_name in env.reward_names:
         episode_rewards[reward_name] = []
         episode_values[reward_name] = []
+        episode_values_orig[reward_name] = []
     
     sim_images = []
+    randomise_target_pos()
+    randomise_rewards()
     o, d, ep_ret, ep_len = env.reset(), False, 0, 0
+    
+    # Initialize variables for smooth target movement during evaluation
+    target_velocity = np.array([0.0, 0.0])
+    
+    # For exporting a trained agent, we bypass curriculum learning
+    # and set the target to move at its maximum difficulty/speed.
+    base_target_speed = target_max_speed 
         
     while not(d or (ep_len == max_ep_len)):
             
-        # Until start_steps have elapsed, randomly sample actions
-        # from a uniform distribution for better exploration. Afterwards, 
-        # use the learned policy. 
+        # Use the learned policy deterministically for evaluation
         a = sac.get_action(np.expand_dims(o, 0))
         a = np.squeeze(a, 0)
 
@@ -561,45 +584,57 @@ def export_episode(env, sim_file, reward_file, value_file):
         ep_len += 1
         
         for reward, reward_name in zip(env.rewards, env.reward_names):
-            
-            #print("reward ", reward_name, " value ", reward.value)
-            
             episode_rewards[reward_name].append(reward.reward)
             episode_values[reward_name].append(reward.value)
+            episode_values_orig[reward_name].append(reward.orig_value)
+            
+        # Update target position continuously instead of teleporting
+        if base_target_speed > 0:
+            # Occasionally change the target's direction randomly (e.g., 2% chance per step)
+            if random.random() < 0.02 or np.linalg.norm(target_velocity) == 0:
+                rand_angle = random.uniform(0, 2 * math.pi)
+                target_velocity = np.array([math.cos(rand_angle), math.sin(rand_angle)]) * base_target_speed
+            
+            # Get current target position
+            current_target_pos = target.body.get_position()
+            
+            # Calculate new position
+            new_x = current_target_pos[0] + target_velocity[0]
+            new_y = current_target_pos[1] + target_velocity[1]
+            
+            # Keep target within bounds (bounce off invisible boundary)
+            if np.linalg.norm([new_x, new_y]) > target_max_center_dist:
+                target_velocity = -target_velocity # reverse direction
+                new_x = current_target_pos[0] + target_velocity[0]
+                new_y = current_target_pos[1] + target_velocity[1]
+                
+            # Apply new position
+            target.body.set_position([new_x, new_y, current_target_pos[2]])
         
-        env.camera.look_at(env.agent.body.get_position());
+        # Look at the agent
+        env.camera.look_at(env.agent.body.get_position())
             
         sim_images.append(env.render(mode="rgb_array"))
         
-        # Ignore the "done" signal if it comes from hitting the time
-        # horizon (that is, when it's an artificial terminal signal
-        # that isn't based on the agent's state)
-        #d = False if ep_len==max_ep_len else d
-    
         # Super critical, easy to overlook step: make sure to update 
         # most recent observation!
         o = o2
         
-    
     save_frames_as_gif(sim_images, filename=sim_file + ".gif") 
     
     plot_labels = list(episode_rewards.keys())
     
-    plot_x = np.arange(len(episode_values["alive"]))
+    plot_x = np.arange(len(episode_values["move_dist"]))
     plot_rewards_y = np.array(list(episode_rewards.values()))
     plot_rewards_y = plot_rewards_y[:, :-1] # drop last reward
     plot_values_y = np.array(list(episode_values.values()))
     plot_values_y = plot_values_y[:, :-1] # drop last value
+    plot_values_orig_y = np.array(list(episode_values_orig.values()))
+    plot_values_orig_y = plot_values_orig_y[:, :-1] # drop last value
     
-    reward_images = PlotUtils.create_plot_anim(plot_x, plot_rewards_y, plot_labels, 15, 5)
-    save_images_as_gif(reward_images, filename=reward_file + ".gif") 
-    #reward_images[0].save(reward_file + ".gif", save_all=True, append_images=reward_images[1:])
     PlotUtils.save_data_as_csv(plot_rewards_y, plot_labels, reward_file + ".csv")
-    
-    value_images = PlotUtils.create_plot_anim(plot_x, plot_values_y, plot_labels, 15, 5)
-    save_images_as_gif(value_images, filename=value_file + ".gif") 
-    #value_images[0].save(value_file + ".gif", save_all=True, append_images=value_images[1:])
     PlotUtils.save_data_as_csv(plot_values_y, plot_labels, value_file + ".csv")
+    PlotUtils.save_data_as_csv(plot_values_orig_y, plot_labels, value_file + "_orig.csv")
 
 for export_index in range(test_episode_count):
     export_episode(env, "{}/sim_{}_{}".format(result_file_path, epochs, export_index), "{}/reward_{}_{}".format(result_file_path, epochs, export_index), "{}/value_{}_{}".format(result_file_path, epochs, export_index))
