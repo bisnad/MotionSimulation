@@ -1,8 +1,7 @@
 """
-this trains an agent with constant values for dist and effort
-dist in this case is not movement distance but distance between agent and a target
-replaced te non-feet floor contact with a non-live ending negative reward
-also, there is no conditional control for the agent
+same as sac_constant_train.py but with the following changes:
+The randomised_rewards function fully rewrites the control state with continuously sampled effort weights
+The train_agent function ends an episode when the agent is close to the target and then randomised rewards and agent position
 """
 
 import sys
@@ -50,6 +49,7 @@ from custom.rewards.weight_effort_reward import WeightEffortReward
 from custom.rewards.time_effort_reward import TimeEffortReward
 from custom.rewards.space_effort_reward import SpaceEffortReward
 from custom.rewards.flow_effort_reward import FlowEffortReward
+from custom.rewards.target_distance_reward import TargetDistanceReward
 from custom.rewards.ground_contact_reward import GroundContactReward
 
 # custom environment
@@ -61,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_sac_v2_run14"
+result_file_path = "results/biped_control_sac_v2_run17"
 
 """
 configuration: agent
@@ -217,7 +217,7 @@ with open(config_path) as json_file:
     target_move_reward_threshold = target_config["target_move_reward_threshold"]
     target_speed_increment = target_config["target_speed_increment"]
     target_max_speed = target_config["target_max_speed"]
-    
+
     # agent cost and rewards
     rewards_config = config_data["reward"]
     
@@ -240,7 +240,7 @@ with open(config_path) as json_file:
     agent_ground_contact_cost = rewards_config["agent_ground_contact_cost"]
 
     agent_move_distance_reward_scale = rewards_config["agent_move_distance_reward_scale"]
-
+    
     agent_move_to_target_reward_scale = rewards_config["agent_move_to_target_reward_scale"]
     agent_stay_at_target_reward_scale = rewards_config["agent_stay_at_target_reward_scale"]
 
@@ -313,7 +313,6 @@ env.add_agent(agent)
 agent.set_reset_position(agent_reset_position)
 agent.set_reset_orientation(agent_reset_orientation)
 
-
 def randomise_target_pos():
     
     rand_azim = random.uniform(0.0, math.pi * 2.0)
@@ -357,15 +356,20 @@ agent.add_state(bodyVelState, "bodyVel")
 bodyTargetState = BodyTargetState()
 agent.add_state(bodyTargetState, "bodyTarget")
 
-# agent alive state
+# external control state with following content
+# 0: dist weight
+# 1 - 9: effort weight, effort taget value
+controlState = CustomState()
+controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+agent.add_state(controlState, "control")
 
+# agent alive state
 """
 # agent stops being alive when non feet in contact with ground
 aliveState = GroundContactAliveState()
 aliveState.feet_names = agent_feet_names
 agent.add_alive_state(aliveState, "alive")
 """
-
 # agent stops being alive when its root link moves too fast
 aliveState2 = MaxVelocityState()
 aliveState2.max_linear_speed = 10.0
@@ -474,6 +478,55 @@ if load_model_weights:
 
 if load_replay_buffer:
     sac.load_replay_buffer(result_file_path, load_epoch)
+    
+def randomise_rewards():
+    # 1. Distance reward: ensure the agent always has some incentive to move 
+    moveDistanceReward.reward_scale = random.uniform(0.5, 1.0)
+    controlState.state[0] = moveDistanceReward.reward_scale
+    
+    # 2. Sample continuous effort weights (importance of each factor for this episode)
+    weight_w = random.uniform(0.0, 1.0)
+    time_w = random.uniform(0.0, 1.0)
+    space_w = random.uniform(0.0, 1.0)
+    flow_w = random.uniform(0.0, 1.0)
+    
+    # Normalize weights so their sum is 1.0
+    total_effort = weight_w + time_w + space_w + flow_w
+    if total_effort > 0:
+        weight_w /= total_effort
+        time_w /= total_effort
+        space_w /= total_effort
+        flow_w /= total_effort
+
+    # 3. FIX: Sample discrete polarities (0.0 or 1.0) for Laban Effort Factors
+    # This forces the agent to explicitly choose an extreme rather than averaging.
+    weight_t = random.choice([0.0, 1.0])
+    time_t = random.choice([0.0, 1.0])
+    space_t = random.choice([0.0, 1.0])
+    flow_t = random.choice([0.0, 1.0])
+
+    # 4. Assign the new scales and targets to the reward objects
+    weightEffortReward.reward_scale = weight_w
+    weightEffortReward.target_value = weight_t
+    
+    timeEffortReward.reward_scale = time_w
+    timeEffortReward.target_value = time_t
+    
+    spaceEffortReward.reward_scale = space_w
+    spaceEffortReward.target_value = space_t
+    
+    flowEffortReward.reward_scale = flow_w
+    flowEffortReward.target_value = flow_t
+    
+    # 5. Completely overwrite the controlState vector to avoid stale observations
+    controlState.state[1] = weight_w
+    controlState.state[2] = weight_t
+    controlState.state[3] = time_w
+    controlState.state[4] = time_t
+    controlState.state[5] = space_w
+    controlState.state[6] = space_t
+    controlState.state[7] = flow_w
+    controlState.state[8] = flow_t
 
 # output gym render frames as gif
 def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
@@ -573,8 +626,6 @@ def export_episode(env, sim_file, reward_file, value_file):
     #value_images[0].save(value_file + ".gif", save_all=True, append_images=value_images[1:])
     PlotUtils.save_data_as_csv(plot_values_y, plot_labels, value_file + ".csv")
 
-target_velocity = np.array([0.0, 0.0])
-base_target_speed = 0.0
 
 def train_agent(epochs, steps_per_epoch, render):
 
@@ -613,6 +664,7 @@ def train_agent(epochs, steps_per_epoch, render):
     """
     
     randomise_target_pos()
+    randomise_rewards()
     o, ep_ret, ep_len = env.reset(), 0, 0
     
     # Main loop: collect experience in env and update/log each epoch
@@ -635,7 +687,7 @@ def train_agent(epochs, steps_per_epoch, render):
         ep_reward[0] += r
         for rI, reward in enumerate(env.rewards):
             ep_reward[rI+1] += reward.reward
-            
+
         # Curriculum Learning: Update the target's speed based on agent's competence
         # Adjust the '200' threshold and '0.05' max speed based on your environment's reward scale
         if len(avg_reward_list) > 0 and avg_reward_list[-1] > target_move_reward_threshold:
@@ -687,11 +739,14 @@ def train_agent(epochs, steps_per_epoch, render):
         # most recent observation!
         o = o2
         
-        # End of trajectory handling
+        # debug
+        #print("weightEffortReward value ", weightEffortReward.value, " reward ", weightEffortReward.reward)
+    
+        # 5. End of trajectory handling
         if d or (ep_len == max_ep_len):
             episode_counter += 1
             
-            # CORRECTED: Append current episode return BEFORE calculating the moving average
+            # Append current episode return BEFORE calculating the moving average
             ep_reward_list.append(ep_ret)
             
             if len(ep_reward_list) > 0:
@@ -701,7 +756,7 @@ def train_agent(epochs, steps_per_epoch, render):
                 
             avg_reward_list.append(avg_reward)
             
-            # store final episode rewards
+            # Store final episode rewards
             reward_history["length"].append(ep_len)
             reward_history["total"].append(ep_reward[0])
             reward_history["avg"].append(avg_reward)
@@ -709,38 +764,39 @@ def train_agent(epochs, steps_per_epoch, render):
             for rI, (reward_name, reward) in enumerate(zip(env.reward_names, env.rewards)):
                 reward_history[reward_name].append(ep_reward[rI+1])
                 
-            # reset episode rewards
+            # Reset episode rewards
             ep_reward = [0.0] * (len(env.rewards) + 1)
 
             epoch = (t+1) // steps_per_epoch
             epoch += load_epoch
-            
-            # Printouts are formatted to 2 decimal places to be easier to read
             print("Epoch {} Episode: {} Length: {} Reward: Current {:.2f} Avg {:.2f} Time {:.2f}".format(
                 epoch, episode_counter, ep_len, ep_ret, avg_reward, (time.time()-start_time)))
             
+            # FIX: Resample the target and reward constraints ONLY at the start of a new episode
             randomise_target_pos()
+            randomise_rewards()
             o, ep_ret, ep_len = env.reset(), 0, 0
-
+            
+            # Reset the time for the next episode
             start_time = time.time()
             
         # Update handling
         if t >= update_after and t % update_every == 0:
             sac.replay_experience()
-    
-        # End of epoch handling
+
+        # End of epoch handling (Saving model, etc.)
         if (t+1) % steps_per_epoch == 0:
             epoch = (t+1) // steps_per_epoch
             epoch += load_epoch
             
             if epoch % save_epoch_interval == 0:
-                
                 if save_model_weights:
-                    sac.save_weights(result_file_path, epoch=epoch)
+                    sac.save_weights(result_file_path, epoch)
                 if save_replay_buffer:
-                    sac.save_replay_buffer(result_file_path, epoch=epoch)
-                            
+                    sac.save_replay_buffer(result_file_path, epoch)
+                                
     return reward_history
+    #return avg_reward_list, ep_reward_list
 
 # train agent
 reward_history = train_agent(epochs, steps_per_epoch, False)

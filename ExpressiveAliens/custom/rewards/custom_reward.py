@@ -58,7 +58,8 @@ class CustomReward:
             
         # calculate difference to target value if necessary
         if self.target_value != None:
-            self.value = 1.0 - abs(self.target_value - self.value)
+            #self.value = 1.0 - abs(self.target_value - self.value)
+            self.value = 1.0 - (2.0 * abs(self.target_value - self.value))
                 
         self.reward = self.value * self.value_reward_scale 
         self.reward *= self.reward_scale

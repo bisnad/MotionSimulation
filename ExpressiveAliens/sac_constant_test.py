@@ -382,8 +382,8 @@ moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
 moveToTargetReward = MoveToTargetReward()
-moveDistanceReward.approach_scale = agent_move_to_target_reward_scale
-moveDistanceReward.stillness_scale = agent_stay_at_target_reward_scale
+moveToTargetReward.approach_scale = agent_move_to_target_reward_scale
+moveToTargetReward.stillness_scale = agent_stay_at_target_reward_scale
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
