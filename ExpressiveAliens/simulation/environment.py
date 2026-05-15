@@ -59,6 +59,8 @@ class Environment(gym.Env):
                 #self.physics = bullet_client.BulletClient(connection_mode=pybullet.GUI, options="--background_color_red=1.0 --background_color_green=1.0 --background_color_blue=1.0")
                 self.physics = bullet_client.BulletClient(connection_mode=pybullet.GUI)
                 self.camera = Camera(self.physics)
+                self.physics.configureDebugVisualizer(pybullet.COV_ENABLE_GUI, 0)
+                
             else:
                 #self.physics = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
                 self.physics = bullet_client.BulletClient()

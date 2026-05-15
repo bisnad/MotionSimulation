@@ -578,52 +578,72 @@ def run_episode(env, osc_sender):
     
     o, d, ep_ret, ep_len = env.reset(), False, 0, 0
         
-    while not(d): # never ending episode (unless agent dies)
-    
-        # osc communication
-        send_joint_orientations(osc_sender, ep_len)
-        send_joint_positions(osc_sender, ep_len)
-    
-        if target_pos_changed == True:
-            
-            target.body.set_position(target_pos)
-            target.set_reset_position(target_pos)
-            
-            #print("target_pos ", target_pos)
-            
-            target_pos_changed = False
-                                    
+    while not(d): # never ending episode (unless agent dies) or the physics engine is closed
 
-        # Until start_steps have elapsed, randomly sample actions
-        # from a uniform distribution for better exploration. Afterwards, 
-        # use the learned policy. 
-        a = sac.get_action(np.expand_dims(o, 0))
-        a = np.squeeze(a, 0)
+        try:
 
-        # Step the env
-        o2, r, d, _ = env.step(a)
-        ep_ret += r
-        ep_len += 1
+            # osc communication
+            send_joint_orientations(osc_sender, ep_len)
+            send_joint_positions(osc_sender, ep_len)
+    
+            if target_pos_changed == True:
+                
+                target.body.set_position(target_pos)
+                target.set_reset_position(target_pos)
+                
+                #print("target_pos ", target_pos)
+                
+                target_pos_changed = False
+                                        
+
+            # Until start_steps have elapsed, randomly sample actions
+            # from a uniform distribution for better exploration. Afterwards, 
+            # use the learned policy. 
+            a = sac.get_action(np.expand_dims(o, 0))
+            a = np.squeeze(a, 0)
+
+            # Step the env
+            o2, r, d, _ = env.step(a)
+            ep_ret += r
+            ep_len += 1
+            
+            env.camera.look_at(env.agent.body.get_position())
+            env.render(mode="human")
+
+            # Ignore the "done" signal if it comes from hitting the time
+            # horizon (that is, when it's an artificial terminal signal
+            # that isn't based on the agent's state)
+            #d = False if ep_len==max_ep_len else d
         
-        env.camera.look_at(env.agent.body.get_position())
-        env.render(mode="human")
+            # Super critical, easy to overlook step: make sure to update 
+            # most recent observation!
+            o = o2
 
-        # Ignore the "done" signal if it comes from hitting the time
-        # horizon (that is, when it's an artificial terminal signal
-        # that isn't based on the agent's state)
-        #d = False if ep_len==max_ep_len else d
-    
-        # Super critical, easy to overlook step: make sure to update 
-        # most recent observation!
-        o = o2
+        except pybullet.error:
+            # This catches the disconnect whether it happens during 
+            # env.step() or getJointState()
+            print("Physics GUI closed. Terminating episode gracefully.")
+            return False
         
         sleep(1.0 / frame_rate)
 
+    return True
+
 
 osc_thread = threading.Thread(target=osc_start_receive)
+osc_thread.daemon = True
 osc_thread.start()
 
-while(True):
-    run_episode(env, osc_sender)
+run_state = True
+
+while(run_state == True):
+    run_state = run_episode(env, osc_sender)
+
     
+print("Shutting down OSC server...")
+
+osc_server.shutdown()
 osc_server.server_close()
+osc_thread.join(timeout=1.0)
+
+print("Application closed gracefully.")
