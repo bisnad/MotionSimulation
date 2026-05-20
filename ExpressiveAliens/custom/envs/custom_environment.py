@@ -39,6 +39,7 @@ class CustomEnvironment(Environment):
         return agent_state
     
     def step(self, action):
+
         self.agent.apply_action(action)
         
         if self.sim_has_drag == True:

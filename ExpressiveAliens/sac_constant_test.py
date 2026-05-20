@@ -57,7 +57,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_sac_v2_run14"
+result_file_path = "results/legless_constant_sac_v2_run17"
 
 """
 configuration: agent
