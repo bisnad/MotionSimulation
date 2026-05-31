@@ -151,12 +151,12 @@ class SAC(RL):
         q1_target_model_full_file_name = "{}/sac_q1_target_epoch_{}.pth".format(file_path, epoch)
         q2_target_model_full_file_name = "{}/sac_q2_target_epoch_{}.pth".format(file_path, epoch)
         
-        self.ac.pi = torch.load(pi_model_full_file_name)
-        self.ac.q1 = torch.load(q1_model_full_file_name)
-        self.ac.q2 = torch.load(q2_model_full_file_name)
-        self.ac_target.pi = torch.load(pi_target_model_full_file_name)
-        self.ac_target.q1 = torch.load(q1_target_model_full_file_name)
-        self.ac_target.q2 = torch.load(q2_target_model_full_file_name)
+        self.ac.pi = torch.load(pi_model_full_file_name, map_location=self.device)
+        self.ac.q1 = torch.load(q1_model_full_file_name, map_location=self.device)
+        self.ac.q2 = torch.load(q2_model_full_file_name, map_location=self.device)
+        self.ac_target.pi = torch.load(pi_target_model_full_file_name, map_location=self.device)
+        self.ac_target.q1 = torch.load(q1_target_model_full_file_name, map_location=self.device)
+        self.ac_target.q2 = torch.load(q2_target_model_full_file_name, map_location=self.device)
 
     def save_models(self, file_path, epoch = 0):
         pi_model_full_file_name = "{}/sac_pi_epoch_{}.pth".format(file_path, epoch)
@@ -183,12 +183,12 @@ class SAC(RL):
         q2_target_weights_full_file_name = "{}/sac_q2_target_epoch_{}".format(file_path, epoch)
         
 
-        self.ac.pi.load_state_dict(torch.load(pi_weights_full_file_name))
-        self.ac.q1.load_state_dict(torch.load(q1_weights_full_file_name))
-        self.ac.q2.load_state_dict(torch.load(q2_weights_full_file_name))
-        self.ac_target.pi.load_state_dict(torch.load(pi_target_weights_full_file_name))
-        self.ac_target.q1.load_state_dict(torch.load(q1_target_weights_full_file_name))
-        self.ac_target.q2.load_state_dict(torch.load(q2_target_weights_full_file_name))
+        self.ac.pi.load_state_dict(torch.load(pi_weights_full_file_name, map_location=self.device))
+        self.ac.q1.load_state_dict(torch.load(q1_weights_full_file_name, map_location=self.device))
+        self.ac.q2.load_state_dict(torch.load(q2_weights_full_file_name, map_location=self.device))
+        self.ac_target.pi.load_state_dict(torch.load(pi_target_weights_full_file_name, map_location=self.device))
+        self.ac_target.q1.load_state_dict(torch.load(q1_target_weights_full_file_name, map_location=self.device))
+        self.ac_target.q2.load_state_dict(torch.load(q2_target_weights_full_file_name, map_location=self.device))
         
     def save_weights(self, file_path, epoch = 0):
         pi_weights_full_file_name = "{}/sac_pi_epoch_{}".format(file_path, epoch)

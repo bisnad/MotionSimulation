@@ -57,7 +57,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_control_sac_v2_run17"
+result_file_path = "results/quadruped_control_sac_v2_run17"
 
 """
 configuration: agent
@@ -348,9 +348,10 @@ agent.add_state(bodyTargetState, "bodyTarget")
 
 # external control state with following content
 # 0: dist weight
-# 1 - 9: effort weight, effort taget value
+# 1: move to target weight
+# 2 - 10: effort weight, effort taget value
 controlState = CustomState()
-controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 agent.add_state(controlState, "control")
 
 # agent alive state
@@ -397,8 +398,8 @@ moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
 moveToTargetReward = MoveToTargetReward()
-moveToTargetReward.approach_scale = agent_move_to_target_reward_scale
-moveToTargetReward.stillness_scale = agent_stay_at_target_reward_scale
+moveDistanceReward.approach_scale = agent_move_to_target_reward_scale
+moveDistanceReward.stillness_scale = agent_stay_at_target_reward_scale
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
@@ -466,15 +467,19 @@ if load_replay_buffer:
     sac.load_replay_buffer(result_file_path, load_epoch)
     
 def randomise_rewards():
-    # 1. Distance reward: ensure the agent always has some incentive to move 
-    moveDistanceReward.reward_scale = random.uniform(0.5, 1.0)
+    # 1. Distance reward
+    moveDistanceReward.reward_scale = random.choice([0.0, 1.0])
     controlState.state[0] = moveDistanceReward.reward_scale
+
+    # 2. Move To Target reward
+    moveToTargetReward.approach_scale = random.choice([0.0, 1.0])
+    controlState.state[1] = moveToTargetReward.approach_scale
     
-    # 2. Sample continuous effort weights (importance of each factor for this episode)
-    weight_w = random.uniform(0.0, 1.0)
-    time_w = random.uniform(0.0, 1.0)
-    space_w = random.uniform(0.0, 1.0)
-    flow_w = random.uniform(0.0, 1.0)
+    # 2. Sample discrete effort weights (importance of each factor for this episode)
+    weight_w = random.choice([0.0, 1.0])
+    time_w = random.choice([0.0, 1.0])
+    space_w = random.choice([0.0, 1.0])
+    flow_w = random.choice([0.0, 1.0])
     
     # Normalize weights so their sum is 1.0
     total_effort = weight_w + time_w + space_w + flow_w
@@ -484,7 +489,7 @@ def randomise_rewards():
         space_w /= total_effort
         flow_w /= total_effort
 
-    # 3. FIX: Sample discrete polarities (0.0 or 1.0) for Laban Effort Factors
+    # 3. Sample discrete polarities (0.0 or 1.0) for Laban Effort Factors
     # This forces the agent to explicitly choose an extreme rather than averaging.
     weight_t = random.choice([0.0, 1.0])
     time_t = random.choice([0.0, 1.0])
@@ -505,14 +510,14 @@ def randomise_rewards():
     flowEffortReward.target_value = flow_t
     
     # 5. Completely overwrite the controlState vector to avoid stale observations
-    controlState.state[1] = weight_w
-    controlState.state[2] = weight_t
-    controlState.state[3] = time_w
-    controlState.state[4] = time_t
-    controlState.state[5] = space_w
-    controlState.state[6] = space_t
-    controlState.state[7] = flow_w
-    controlState.state[8] = flow_t
+    controlState.state[2] = weight_w
+    controlState.state[3] = weight_t
+    controlState.state[4] = time_w
+    controlState.state[5] = time_t
+    controlState.state[6] = space_w
+    controlState.state[7] = space_t
+    controlState.state[8] = flow_w
+    controlState.state[9] = flow_t
 
 # output gym render frames as gif
 def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
