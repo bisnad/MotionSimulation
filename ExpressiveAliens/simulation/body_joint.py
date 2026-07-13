@@ -46,6 +46,17 @@ class BodyJoint:
     def get_state(self):
         x, vx,_,_ = self.physics.getJointState(self.body_id, self.joint_id)
         return x, vx
+
+    def get_link_state(self):
+        link_state = self.physics.getLinkState(self.body_id, self.joint_id, computeForwardKinematics=1)
+        world_pos = link_state[4]
+        world_rot = link_state[5]
+
+        #print("link_state ", link_state)
+        #print("world_pos ", world_pos)
+        #print("world_rot ", world_rot)
+
+        return world_pos, world_rot
     
     def get_full_state(self):
         x, vx, rf, _ = self.physics.getJointState(self.body_id, self.joint_id)
@@ -70,7 +81,58 @@ class BodyJoint:
             vel *= 0.5
             
         return (pos, vel)
+
+    def get_world_pose(self):
+        """
+        Returns the true world position (3) and rotation (4) of the joint.
+        In PyBullet, the joint frame is the URDF link frame of the child link.
+        """
+        link_state = self.physics.getLinkState(
+            self.body_id, 
+            self.joint_id, 
+            computeForwardKinematics=1
+        )
+        world_pos = link_state[4]  # (x, y, z)
+        world_rot = link_state[5]  # (x, y, z, w) quaternion
+        
+        return world_pos, world_rot
    
+    def get_local_pose(self):
+        """
+        Returns the true local position (3) and rotation (4) of the joint 
+        relative to its parent link's frame.
+        """
+        # 1. Get this joint's (child link's) world pose
+        child_pos, child_rot = self.get_world_pose()
+        
+        # 2. Get the parent link index
+        joint_info = self.physics.getJointInfo(self.body_id, self.joint_id)
+        parent_id = joint_info[16]
+        
+        # 3. Get the parent link's world pose
+        if parent_id == -1:
+            # The parent is the base of the robot
+            parent_pos, parent_rot = self.physics.getBasePositionAndOrientation(self.body_id)
+        else:
+            # The parent is another link in the chain
+            parent_state = self.physics.getLinkState(
+                self.body_id, 
+                parent_id, 
+                computeForwardKinematics=1
+            )
+            parent_pos = parent_state[4]
+            parent_rot = parent_state[5]
+            
+        # 4. Compute the relative transform: T_local = T_parent^-1 * T_child
+        inv_parent_pos, inv_parent_rot = self.physics.invertTransform(parent_pos, parent_rot)
+        
+        local_pos, local_rot = self.physics.multiplyTransforms(
+            inv_parent_pos, inv_parent_rot, 
+            child_pos, child_rot
+        )
+        
+        return local_pos, local_rot
+
     def get_position(self):
         x, _ = self.get_state()
         return x
@@ -78,6 +140,18 @@ class BodyJoint:
     def get_orientation(self):
         _,r = self.get_state()
         return r
+
+    def get_world_position(self):
+        return self.get_world_pose()[0]
+
+    def get_world_rotation(self):
+        return self.get_world_pose()[1]
+
+    def get_local_position(self):
+        return self.get_local_pose()[0]
+
+    def get_local_rotation(self):
+        return self.get_local_pose()[1]
     
     def get_velocity(self):
         _, vx = self.get_state()

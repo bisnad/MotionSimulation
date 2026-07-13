@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "9e83762b80a69a2cde640794",
+    "documentMicroversion": "81786ddd60d8c5b6c81c6671",
+    "elementId": "d3af08b37fc3ec296c88fca2",
+    "fullConfiguration": "default",
+    "id": "MZT8017WnNxyzx9ZP",
+    "isStandardContent": false,
+    "name": "shoulder_part <4>",
+    "partId": "JHD",
+    "suppressed": false,
+    "type": "Part"
+}

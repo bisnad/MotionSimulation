@@ -1,0 +1,519 @@
+<robot name="onshape">
+<link name="leafless_branch_v1">
+<visual>
+<origin xyz="-0.174605 0.139329 -0.114795" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v1.stl"/>
+</geometry>
+<material name="leafless_branch_v1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-0.174605 0.139329 -0.114795" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v1.stl"/>
+</geometry>
+<material name="leafless_branch_v1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-0.174605 0.139329 0.689629" rpy="0 0 0"/>
+<mass value="152.51" />
+<inertia ixx="35.6485" ixy="-0.113112"  ixz="-1.50512e-16" iyy="36.1972" iyz="-2.93318e-16" izz="1.33593" />
+</inertial>
+</link>
+
+<link name="branch">
+<visual>
+<origin xyz="0 2.22045e-16 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 2.22045e-16 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="6.94359e-18 -0.844949 -0.0020965" rpy="0 0 0"/>
+<mass value="145.017" />
+<inertia ixx="1.30066" ixy="-0.249599"  ixz="-1.14822e-16" iyy="30.7623" iyz="0.113112" izz="31.3103" />
+</inertial>
+</link>
+
+<link name="branch_2">
+<visual>
+<origin xyz="-4.44089e-16 4.44089e-16 -1.11022e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-4.44089e-16 4.44089e-16 -1.11022e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.90242e-16 -0.844949 -0.0020965" rpy="0 0 0"/>
+<mass value="145.017" />
+<inertia ixx="1.30066" ixy="-0.249599"  ixz="-1.28678e-16" iyy="30.7623" iyz="0.113112" izz="31.3103" />
+</inertial>
+</link>
+
+<link name="leafless_branch_v2">
+<visual>
+<origin xyz="-4.44089e-16 1.11022e-16 4.44089e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-4.44089e-16 1.11022e-16 4.44089e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.96254e-16 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="-1.44078e-15" iyy="24.48" iyz="1.38398e-15" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch7" type="revolute">
+<origin xyz="-4.44089e-16 -1.4 -0.21" rpy="1.5708 0.523599 1.5708" />
+<parent link="branch_2" />
+<child link="leafless_branch_v2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="leafless_branch_v2_2">
+<visual>
+<origin xyz="2.22045e-16 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="2.22045e-16 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="1.84499e-16 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="-5.68372e-17" iyy="24.48" iyz="-1.33385e-15" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch8" type="revolute">
+<origin xyz="-4.44089e-16 -1.4 0.21" rpy="-1.5708 -0.523599 1.5708" />
+<parent link="branch_2" />
+<child link="leafless_branch_v2_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="branch3" type="revolute">
+<origin xyz="0 -1.4 0.21" rpy="-1.5708 -0.523599 1.5708" />
+<parent link="branch" />
+<child link="branch_2" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="branch_3">
+<visual>
+<origin xyz="4.44089e-16 -2.22045e-16 1.11022e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="4.44089e-16 -2.22045e-16 1.11022e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="4.86211e-16 -0.844949 -0.0020965" rpy="0 0 0"/>
+<mass value="145.017" />
+<inertia ixx="1.30066" ixy="-0.249599"  ixz="-9.58149e-16" iyy="30.7623" iyz="0.113112" izz="31.3103" />
+</inertial>
+</link>
+
+<link name="leafless_branch_v2_3">
+<visual>
+<origin xyz="-4.44089e-16 4.44089e-16 -2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-4.44089e-16 4.44089e-16 -2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-4.60023e-16 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="1.36514e-15" iyy="24.48" iyz="-1.35889e-15" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch9" type="revolute">
+<origin xyz="2.22045e-16 -1.4 -0.21" rpy="1.5708 0.523599 1.5708" />
+<parent link="branch_3" />
+<child link="leafless_branch_v2_3" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="leafless_branch_v2_4">
+<visual>
+<origin xyz="0 -4.44089e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 -4.44089e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="5.27801e-18 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="1.35887e-15" iyy="24.48" iyz="-1.35887e-15" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch10" type="revolute">
+<origin xyz="4.44089e-16 -1.4 0.21" rpy="-1.5708 -0.523599 1.5708" />
+<parent link="branch_3" />
+<child link="leafless_branch_v2_4" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="branch4" type="revolute">
+<origin xyz="0 -1.4 -0.21" rpy="1.5708 0.523599 1.5708" />
+<parent link="branch" />
+<child link="branch_3" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="branch1" type="revolute">
+<origin xyz="-0.384605 0.139329 1.2852" rpy="-1.5708 1.0472 -3.14159" />
+<parent link="leafless_branch_v1" />
+<child link="branch" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="branch_4">
+<visual>
+<origin xyz="0 1.11022e-16 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 1.11022e-16 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="6.94359e-18 -0.844949 -0.0020965" rpy="0 0 0"/>
+<mass value="145.017" />
+<inertia ixx="1.30066" ixy="-0.249599"  ixz="-1.14822e-16" iyy="30.7623" iyz="0.113112" izz="31.3103" />
+</inertial>
+</link>
+
+<link name="branch_5">
+<visual>
+<origin xyz="0 0 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-5.16865e-17 -0.844949 -0.0020965" rpy="0 0 0"/>
+<mass value="145.017" />
+<inertia ixx="1.30066" ixy="-0.249599"  ixz="1.71277e-15" iyy="30.7623" iyz="0.113112" izz="31.3103" />
+</inertial>
+</link>
+
+<link name="leafless_branch_v2_5">
+<visual>
+<origin xyz="2.22045e-16 0 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="2.22045e-16 0 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="2.06077e-16 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="1.39983e-15" iyy="24.48" iyz="-6.91991e-16" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch11" type="revolute">
+<origin xyz="-2.22045e-16 -1.4 -0.21" rpy="1.5708 0.523599 1.5708" />
+<parent link="branch_5" />
+<child link="leafless_branch_v2_5" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="leafless_branch_v2_6">
+<visual>
+<origin xyz="0 1.11022e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 1.11022e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="4.78356e-17 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="5.68372e-17" iyy="24.48" iyz="1.33385e-15" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch12" type="revolute">
+<origin xyz="0 -1.4 0.21" rpy="-1.5708 -0.523599 1.5708" />
+<parent link="branch_5" />
+<child link="leafless_branch_v2_6" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="branch5" type="revolute">
+<origin xyz="2.22045e-16 -1.4 -0.21" rpy="1.5708 0.523599 1.5708" />
+<parent link="branch_4" />
+<child link="branch_5" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="branch_6">
+<visual>
+<origin xyz="-2.22045e-16 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-2.22045e-16 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://branch.stl"/>
+</geometry>
+<material name="branch_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-9.78408e-17 -0.844949 -0.0020965" rpy="0 0 0"/>
+<mass value="145.017" />
+<inertia ixx="1.30066" ixy="-0.249599"  ixz="-1.0185e-15" iyy="30.7623" iyz="0.113112" izz="31.3103" />
+</inertial>
+</link>
+
+<link name="leafless_branch_v2_7">
+<visual>
+<origin xyz="-2.22045e-16 4.44089e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-2.22045e-16 4.44089e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.37713e-16 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="1.33046e-15" iyy="24.48" iyz="1.25138e-17" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch13" type="revolute">
+<origin xyz="0 -1.4 0.21" rpy="-1.5708 -0.523599 1.5708" />
+<parent link="branch_6" />
+<child link="leafless_branch_v2_7" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="leafless_branch_v2_8">
+<visual>
+<origin xyz="4.44089e-16 2.22045e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="4.44089e-16 2.22045e-16 2.22045e-16" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://leafless_branch_v2.stl"/>
+</geometry>
+<material name="leafless_branch_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="4.91925e-16 -0.76665 -0.00239751" rpy="0 0 0"/>
+<mass value="126.81" />
+<inertia ixx="0.624841" ixy="-0.225794"  ixz="-1.44078e-15" iyy="24.48" iyz="4.10173e-15" izz="24.4793" />
+</inertial>
+</link>
+
+<joint name="branch14" type="revolute">
+<origin xyz="0 -1.4 -0.21" rpy="1.5708 0.523599 1.5708" />
+<parent link="branch_6" />
+<child link="leafless_branch_v2_8" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="branch6" type="revolute">
+<origin xyz="2.22045e-16 -1.4 0.21" rpy="-1.5708 -0.523599 1.5708" />
+<parent link="branch_4" />
+<child link="branch_6" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="branch2" type="revolute">
+<origin xyz="0.0353954 0.139329 1.2852" rpy="-1.5708 1.0472 1.22465e-16" />
+<parent link="leafless_branch_v1" />
+<child link="branch_4" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="-0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+
+</robot>

@@ -1,0 +1,589 @@
+<robot name="onshape">
+<link name="hips_v2">
+<visual>
+<origin xyz="0 0 0" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://hips_v2.stl"/>
+</geometry>
+<material name="hips_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0 0" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://hips_v2.stl"/>
+</geometry>
+<material name="hips_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="1.02797e-17 5.61143e-18 0.115446" rpy="0 0 0"/>
+<mass value="34.3235" />
+<inertia ixx="0.255978" ixy="0"  ixz="0" iyy="0.369075" iyz="0" izz="0.320715" />
+</inertial>
+</link>
+
+<link name="hip_joint">
+<visual>
+<origin xyz="0 0.1 -0.01" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://hip_joint.stl"/>
+</geometry>
+<material name="hip_joint_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0.1 -0.01" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://hip_joint.stl"/>
+</geometry>
+<material name="hip_joint_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="6.73972e-37 0.0240455 -0.0859545" rpy="0 0 0"/>
+<mass value="15.0204" />
+<inertia ixx="0.0781127" ixy="-0.0132823"  ixz="0" iyy="0.0781127" iyz="0" izz="0.0811233" />
+</inertial>
+</link>
+
+<link name="joint_flat">
+<visual>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://joint_flat.stl"/>
+</geometry>
+<material name="joint_flat_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://joint_flat.stl"/>
+</geometry>
+<material name="joint_flat_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-1.83967e-18 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upper_leg_v2">
+<visual>
+<origin xyz="0 0.8 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://upper_leg_v2.stl"/>
+</geometry>
+<material name="upper_leg_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0.8 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://upper_leg_v2.stl"/>
+</geometry>
+<material name="upper_leg_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="6.06162e-18 0.380741 0.00760038" rpy="0 0 0"/>
+<mass value="60.2057" />
+<inertia ixx="0.417664" ixy="0.351619"  ixz="0" iyy="3.33483" iyz="0" izz="3.36634" />
+</inertial>
+</link>
+
+<link name="knee">
+<visual>
+<origin xyz="0.1 -0.1 -0.05" rpy="-1.5708 -0 0" />
+<geometry>
+<mesh filename="package://knee.stl"/>
+</geometry>
+<material name="knee_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0.1 -0.1 -0.05" rpy="-1.5708 -0 0" />
+<geometry>
+<mesh filename="package://knee.stl"/>
+</geometry>
+<material name="knee_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.0649685 0.0220129 -0.05" rpy="0 0 0"/>
+<mass value="17.8872" />
+<inertia ixx="0.104973" ixy="0.0137936"  ixz="-2.27887e-18" iyy="0.126436" iyz="1.17877e-17" izz="0.197785" />
+</inertial>
+</link>
+
+<link name="lower_leg">
+<visual>
+<origin xyz="0 -6.12323e-18 -0.6" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://lower_leg.stl"/>
+</geometry>
+<material name="lower_leg_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 -6.12323e-18 -0.6" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://lower_leg.stl"/>
+</geometry>
+<material name="lower_leg_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-5.40021e-18 0 -0.3" rpy="0 0 0"/>
+<mass value="50.8938" />
+<inertia ixx="1.65405" ixy="0"  ixz="0" iyy="1.65405" iyz="0" izz="0.254469" />
+</inertial>
+</link>
+
+<link name="simple_foot">
+<visual>
+<origin xyz="0 -6.12323e-18 -0.1" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://simple_foot.stl"/>
+</geometry>
+<material name="simple_foot_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 -6.12323e-18 -0.1" rpy="0 -0 0" />
+<geometry>
+<mesh filename="package://simple_foot.stl"/>
+</geometry>
+<material name="simple_foot_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-3.1882e-19 -2.44929e-18 -0.085" rpy="0 0 0"/>
+<mass value="14.1372" />
+<inertia ixx="0.0689187" ixy="0"  ixz="0" iyy="0.0689187" iyz="0" izz="0.065031" />
+</inertial>
+</link>
+
+<joint name="right_foot" type="fixed">
+<origin xyz="0 0 -0.6" rpy="0 -0 0" />
+<parent link="lower_leg" />
+<child link="simple_foot" />
+<axis xyz="0 0 1"/>
+<limit effort="1" velocity="20" />
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="right_leg4" type="fixed">
+<origin xyz="0.1 0.15 -0.05" rpy="1.5708 -1.5708 0" />
+<parent link="knee" />
+<child link="lower_leg" />
+<axis xyz="0 0 1"/>
+<limit effort="1" velocity="20" />
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="right_knee" type="revolute">
+<origin xyz="0.05 0.7 0.1" rpy="1.65212e-16 1.5708 0" />
+<parent link="upper_leg_v2" />
+<child link="knee" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="0" upper="2.0944"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="right_leg3" type="revolute">
+<origin xyz="5.55112e-17 6.12323e-18 -0.15" rpy="-1.5708 -0 0" />
+<parent link="joint_flat" />
+<child link="upper_leg_v2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="0" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="right_leg2" type="revolute">
+<origin xyz="6.12323e-18 0.11 -0.11" rpy="1.5708 -1.5708 0" />
+<parent link="hip_joint" />
+<child link="joint_flat" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="0" upper="0.785398"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="right_leg1" type="revolute">
+<origin xyz="-0.15 0 0.1" rpy="-1.5708 -0 -1.5708" />
+<parent link="hips_v2" />
+<child link="hip_joint" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="hip_joint_2">
+<visual>
+<origin xyz="0 0.1 -0.01" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://hip_joint.stl"/>
+</geometry>
+<material name="hip_joint_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0.1 -0.01" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://hip_joint.stl"/>
+</geometry>
+<material name="hip_joint_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="6.73972e-37 0.0240455 -0.0859545" rpy="0 0 0"/>
+<mass value="15.0204" />
+<inertia ixx="0.0781127" ixy="-0.0132823"  ixz="0" iyy="0.0781127" iyz="0" izz="0.0811233" />
+</inertial>
+</link>
+
+<link name="joint_flat_2">
+<visual>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 2.75465e-52" />
+<geometry>
+<mesh filename="package://joint_flat.stl"/>
+</geometry>
+<material name="joint_flat_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 2.75465e-52" />
+<geometry>
+<mesh filename="package://joint_flat.stl"/>
+</geometry>
+<material name="joint_flat_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-1.83967e-18 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="-3.94812e-53"  ixz="-2.54369e-54" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="upper_leg_v2_2">
+<visual>
+<origin xyz="0 0.8 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://upper_leg_v2.stl"/>
+</geometry>
+<material name="upper_leg_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0.8 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://upper_leg_v2.stl"/>
+</geometry>
+<material name="upper_leg_v2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="6.06162e-18 0.380741 0.00760038" rpy="0 0 0"/>
+<mass value="60.2057" />
+<inertia ixx="0.417664" ixy="0.351619"  ixz="-6.43513e-34" iyy="3.33483" iyz="-5.41754e-34" izz="3.36634" />
+</inertial>
+</link>
+
+<link name="knee_2">
+<visual>
+<origin xyz="0.1 -0.1 -0.05" rpy="-1.5708 2.3623e-32 0" />
+<geometry>
+<mesh filename="package://knee.stl"/>
+</geometry>
+<material name="knee_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0.1 -0.1 -0.05" rpy="-1.5708 2.3623e-32 0" />
+<geometry>
+<mesh filename="package://knee.stl"/>
+</geometry>
+<material name="knee_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="0.0649685 0.0220129 -0.05" rpy="0 0 0"/>
+<mass value="17.8872" />
+<inertia ixx="0.104973" ixy="0.0137936"  ixz="-2.27887e-18" iyy="0.126436" iyz="1.17877e-17" izz="0.197785" />
+</inertial>
+</link>
+
+<link name="lower_leg_2">
+<visual>
+<origin xyz="0 -6.12323e-18 -0.6" rpy="0 -0 -2.93399e-32" />
+<geometry>
+<mesh filename="package://lower_leg.stl"/>
+</geometry>
+<material name="lower_leg_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 -6.12323e-18 -0.6" rpy="0 -0 -2.93399e-32" />
+<geometry>
+<mesh filename="package://lower_leg.stl"/>
+</geometry>
+<material name="lower_leg_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-5.40021e-18 -1.15556e-32 -0.3" rpy="0 0 0"/>
+<mass value="50.8938" />
+<inertia ixx="1.65405" ixy="-1.55082e-32"  ixz="0" iyy="1.65405" iyz="0" izz="0.254469" />
+</inertial>
+</link>
+
+<link name="simple_foot_2">
+<visual>
+<origin xyz="-5.55112e-17 -6.12323e-18 -0.1" rpy="0 -0 -2.93399e-32" />
+<geometry>
+<mesh filename="package://simple_foot.stl"/>
+</geometry>
+<material name="simple_foot_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-5.55112e-17 -6.12323e-18 -0.1" rpy="0 -0 -2.93399e-32" />
+<geometry>
+<mesh filename="package://simple_foot.stl"/>
+</geometry>
+<material name="simple_foot_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-5.583e-17 -2.44929e-18 -0.085" rpy="0 0 0"/>
+<mass value="14.1372" />
+<inertia ixx="0.0689187" ixy="-6.46175e-34"  ixz="0" iyy="0.0689187" iyz="0" izz="0.065031" />
+</inertial>
+</link>
+
+<joint name="left_foot" type="fixed">
+<origin xyz="0 2.21479e-18 -0.6" rpy="0 -0 -2.93399e-32" />
+<parent link="lower_leg_2" />
+<child link="simple_foot_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1" velocity="20" />
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="left_leg4" type="fixed">
+<origin xyz="0.1 0.15 -0.05" rpy="1.5708 -1.5708 0" />
+<parent link="knee_2" />
+<child link="lower_leg_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1" velocity="20" />
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="left_knee" type="revolute">
+<origin xyz="0.05 0.7 0.1" rpy="1.77799e-16 1.5708 0" />
+<parent link="upper_leg_v2_2" />
+<child link="knee_2" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="0" upper="2.0944"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="left_leg3" type="revolute">
+<origin xyz="0 5.42934e-18 -0.15" rpy="-1.5708 -9.20484e-16 8.78695e-16" />
+<parent link="joint_flat_2" />
+<child link="upper_leg_v2_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-1.5708" upper="0"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="left_leg2" type="revolute">
+<origin xyz="8.1566e-19 0.11 -0.11" rpy="1.5708 1.5708 0" />
+<parent link="hip_joint_2" />
+<child link="joint_flat_2" />
+<axis xyz="0 0 1"/>
+<limit effort="1000" velocity="20" lower="-0.785398" upper="0"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="left_leg1" type="revolute">
+<origin xyz="0.15 0 0.1" rpy="-1.5708 -0 1.5708" />
+<parent link="hips_v2" />
+<child link="hip_joint_2" />
+<axis xyz="0 0 1"/>
+<limit effort="2000" velocity="20" lower="-1.5708" upper="1.5708"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<link name="joint_flat_3">
+<visual>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://joint_flat.stl"/>
+</geometry>
+<material name="joint_flat_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 6.12323e-18 0" rpy="3.14159 -0 0" />
+<geometry>
+<mesh filename="package://joint_flat.stl"/>
+</geometry>
+<material name="joint_flat_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-1.83967e-18 0.0279294 -0.0956494" rpy="0 0 0"/>
+<mass value="10.8856" />
+<inertia ixx="0.0674171" ixy="0"  ixz="0" iyy="0.0759085" iyz="0.00923416" izz="0.0431093" />
+</inertial>
+</link>
+
+<link name="spine1">
+<visual>
+<origin xyz="-2.31841e-18 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://spine1.stl"/>
+</geometry>
+<material name="spine1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-2.31841e-18 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://spine1.stl"/>
+</geometry>
+<material name="spine1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-0.00784877 -0.25 -0.00784877" rpy="0 0 0"/>
+<mass value="38.7358" />
+<inertia ixx="0.183252" ixy="-0.0687172"  ixz="0.0687172" iyy="1.08176" iyz="0.00238625" izz="1.08176" />
+</inertial>
+</link>
+
+<link name="spine1_2">
+<visual>
+<origin xyz="-2.31841e-18 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://spine1.stl"/>
+</geometry>
+<material name="spine1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="-2.31841e-18 0 0" rpy="1.5708 1.5708 0" />
+<geometry>
+<mesh filename="package://spine1.stl"/>
+</geometry>
+<material name="spine1_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-0.00784877 -0.25 -0.00784877" rpy="0 0 0"/>
+<mass value="38.7358" />
+<inertia ixx="0.183252" ixy="-0.0687172"  ixz="0.0687172" iyy="1.08176" iyz="0.00238625" izz="1.08176" />
+</inertial>
+</link>
+
+<link name="spine2">
+<visual>
+<origin xyz="0 0.5 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://spine2.stl"/>
+</geometry>
+<material name="spine2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</visual>
+<collision>
+<origin xyz="0 0.5 0" rpy="1.5708 -0 0" />
+<geometry>
+<mesh filename="package://spine2.stl"/>
+</geometry>
+<material name="spine2_material">
+<color rgba="0.615686 0.811765 0.929412 1.0"/>
+</material>
+</collision>
+<inertial>
+<origin xyz="-2.38268e-18 0.287263 -0.00657665" rpy="0 0 0"/>
+<mass value="46.2285" />
+<inertia ixx="1.45276" ixy="0"  ixz="0" iyy="0.220661" iyz="-0.0800462" izz="1.45476" />
+</inertial>
+</link>
+
+<joint name="spine4" type="revolute">
+<origin xyz="-2.31841e-18 -0.5 0" rpy="-3.14159 1.5708 0" />
+<parent link="spine1_2" />
+<child link="spine2" />
+<axis xyz="0 0 1"/>
+<limit effort="600" velocity="20" lower="-0.523599" upper="0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="spine3" type="revolute">
+<origin xyz="-2.31841e-18 -0.5 -3.80482e-18" rpy="-0 -1.5708 0" />
+<parent link="spine1" />
+<child link="spine1_2" />
+<axis xyz="0 0 1"/>
+<limit effort="600" velocity="20" lower="-0.174533" upper="0.174533"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="spine2" type="revolute">
+<origin xyz="-8.44165e-18 6.12323e-18 -0.15" rpy="1.5708 -0 3.14159" />
+<parent link="joint_flat_3" />
+<child link="spine1" />
+<axis xyz="0 0 1"/>
+<limit effort="600" velocity="20" lower="-0.523599" upper="0.523599"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+<joint name="spine1" type="revolute">
+<origin xyz="0 6.12323e-18 0.25" rpy="3.14159 -0 1.5708" />
+<parent link="hips_v2" />
+<child link="joint_flat_3" />
+<axis xyz="0 0 1"/>
+<limit effort="600" velocity="20" lower="-0.174533" upper="0.174533"/>
+<joint_properties friction="0.0"/>
+</joint>
+
+
+</robot>

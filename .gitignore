@@ -44,3 +44,16 @@ ExpressiveAliens/results/biped_target_dist1.0_move_dist1.0_run9/replay_epoch_200
 /ExpressiveAliens/results/biped_constant_sac_run1_4
 /ExpressiveAliens/results/biped_control_sac_v2_run1
 /ExpressiveAliens/results/biped_constant_sac_v2_run13
+/ExpressiveAliens_MORL/.spyproject
+/ExpressiveAliens_MORL/common/__pycache__
+/ExpressiveAliens_MORL/analysis/__pycache__
+/ExpressiveAliens_MORL/custom/__pycache__
+/ExpressiveAliens_MORL/custom/agents/__pycache__
+/ExpressiveAliens_MORL/custom/envs/__pycache__
+/ExpressiveAliens_MORL/custom/rewards/__pycache__
+/ExpressiveAliens_MORL/simulation/__pycache__
+/ExpressiveAliens_MORL/results/biped_control_sac_v2_run17_v3
+/ExpressiveAliens_MORL/learning/__pycache__
+/ExpressiveAliens_MORL/custom/states/alive_states/__pycache__
+/ExpressiveAliens_MORL/custom/states/agent_states/__pycache__
+/ExpressiveAliens_MORL/custom/states/__pycache__

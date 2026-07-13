@@ -64,6 +64,8 @@ configuration
 """
 
 result_file_path = "results/biped_constant_sac_v2_run17"
+#result_file_path = "results/quadruped_constant_sac_v2_run17"
+#result_file_path = "results/legless_constant_sac_v2_run17"
 
 """
 configuration frame rate
@@ -79,7 +81,7 @@ osc_rec_address = "0.0.0.0"
 osc_rec_port = 9005
 
 osc_send_address = "127.0.0.1"
-osc_send_port = 9003
+osc_send_port = 9007
 
 """
 configuration: agent
@@ -463,21 +465,105 @@ def create_osc_sender(osc_address, osc_port):
 
 def send_joint_orientations(sender, frame):
     
-    joint_orientations = []
+    joint_local_rotations = []
+    joint_world_rotations = []
     
-    for joint in agent.body.ordered_joints:
-        joint_orientations += [joint.get_orientation()]
+    for i, part in enumerate(agent.body.ordered_parts):
 
-    sender.send_message("/agent/joint/rot", joint_orientations)
+        #print("part index ", i, " name ", part.part_name)
+
+        part_local_orientation = part.get_local_orientation()
+        part_world_orientation = part.get_world_orientation()
+
+        #print("local rot ", part_local_orientation)
+        #print("world rot ", part_world_orientation)
+
+        joint_local_rotations += part_local_orientation.tolist()
+        joint_world_rotations += part_world_orientation.tolist()
+
+        """
+        if part.parent_joint is not None:
+            if part.parent_joint.parent_part is not None:
+                print("parent joint parent part name ", part.parent_joint.parent_part.part_name)
+            if part.parent_joint.child_part is not None:
+                print("parent joint child part name ", part.parent_joint.child_part.part_name)
+
+        if len(part.child_joints) > 0:
+            for j, child_joint in enumerate(part.child_joints):
+                if child_joint.parent_part is not None:
+                    print("child joint parent part name ", child_joint.parent_part.part_name)
+                if child_joint.child_part is not None:
+                    print("child joint child part name ", child_joint.child_part.part_name)
+        """
+
+    sender.send_message("/mocap/0/joint/rot_local", joint_local_rotations)
+    sender.send_message("/mocap/0/joint/rot_world", joint_world_rotations)
     
 def send_joint_positions(sender, frame):
     
-    joint_positions = []
+    joint_local_positions = []
+    joint_world_positions = []
+    
+    for i, part in enumerate(agent.body.ordered_parts):
+
+        #print("part index ", i, " name ", part.part_name)
+
+        part_local_position = part.get_local_position()
+        part_world_position = part.get_world_position()
+
+        #print("local pos ", part_local_position)
+        #print("world pos ", part_world_position)
+
+        joint_local_positions += part_local_position.tolist()
+        joint_world_positions += part_world_position.tolist()
+
+    sender.send_message("/mocap/0/joint/pos_local", joint_local_positions)
+    sender.send_message("/mocap/0/joint/pos_world", joint_world_positions)
+
+
+"""
+def send_joint_orientations(sender, frame):
+    
+    joint_local_rotations = []
+    joint_world_rotations = []
+    
+    for i, joint in enumerate(agent.body.ordered_joints):
+        joint_local_rotations += list(joint.get_local_rotation())
+        joint_world_rotations += list(joint.get_world_rotation())
+
+        print("joint index ", i, "name ", joint.joint_name)
+
+        if joint.parent_part is not None:
+            print("joint index ", i, "parent part name ", joint.parent_part.part_name)
+            if joint.parent_part.parent_joint is not None:
+                print("joint index ", i, "parent part parent joint name ", joint.parent_part.parent_joint.joint_name)
+            if len(joint.parent_part.child_joints) > 0:
+                for j, child_joint in enumerate(joint.parent_part.child_joints):
+                    print("joint index ", i, "parent part child joint index ", j, "name ", child_joint.joint_name)
+
+        if joint.child_part is not None:
+            print("joint index ", i, "child part name ", joint.child_part.part_name)
+            if joint.child_part.parent_joint is not None:
+                print("joint index ", i, "child part parent joint name ", joint.child_part.parent_joint.joint_name)
+            if len(joint.child_part.child_joints) > 0:
+                for j, child_joint in enumerate(joint.child_part.child_joints):
+                    print("joint index ", i, "child part child joint index ", j, "name ", child_joint.joint_name)
+
+    sender.send_message("/mocap/0/joint/rot_local", joint_local_rotations)
+    sender.send_message("/mocap/0/joint/rot_world", joint_world_rotations)
+    
+def send_joint_positions(sender, frame):
+    
+    joint_local_positions = []
+    joint_world_positions = []
     
     for joint in agent.body.ordered_joints:
-        joint_positions += [joint.get_position()]
+        joint_local_positions += list(joint.get_local_position())
+        joint_world_positions += list(joint.get_world_position())
 
-    sender.send_message("/agent/joint/pos", joint_positions)
+    sender.send_message("/mocap/0/joint/pos_local", joint_local_positions)
+    sender.send_message("/mocap/0/joint/pos_world", joint_world_positions)
+"""
 
 osc_sender = create_osc_sender(osc_send_address, osc_send_port)
 

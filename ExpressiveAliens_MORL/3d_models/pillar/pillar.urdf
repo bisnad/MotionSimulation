@@ -1,0 +1,30 @@
+<?xml version="1.0"?> 
+<robot name="Pillar">
+    <!-- Colors --> 
+    <material name="red"> 
+        <color rgba="1 0 0 1"/>
+    </material>
+
+    <!--Main Links-->
+    
+    <link name="pillar">
+        <visual>
+            <geometry>
+                <cylinder length="1.0" radius="0.2"/>
+            </geometry>
+            <material name="red"/>
+            <origin xyz="0 0 0"/>
+        </visual>
+        <collision> 
+            <geometry>
+                <cylinder length="1.0" radius="0.2"/>
+            </geometry>
+            <origin xyz="0 0 0"/>
+        </collision> 
+        <inertial> 
+            <mass value="0"/>
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial> 
+    </link>
+    
+</robot>
