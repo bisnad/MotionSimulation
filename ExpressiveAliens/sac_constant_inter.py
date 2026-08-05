@@ -63,9 +63,9 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_constant_sac_v2_run17"
+#result_file_path = "results/biped_constant_sac_v2_run17"
 #result_file_path = "results/quadruped_constant_sac_v2_run17"
-#result_file_path = "results/legless_constant_sac_v2_run17"
+result_file_path = "results/legless_constant_sac_v2_run17"
 
 """
 configuration frame rate

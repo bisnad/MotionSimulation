@@ -61,7 +61,7 @@ env_name = "Custom_Environment"
 configuration
 """
 
-result_file_path = "results/biped_control_sac_v2_run17_v3"
+result_file_path = "results/biped_control_sac_v2_run17_v4"
 
 """
 configuration: agent
@@ -361,7 +361,7 @@ agent.add_state(bodyTargetState, "bodyTarget")
 # 1: move to target weight
 # 2 - 10: effort weight, effort taget value
 controlState = CustomState()
-controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 agent.add_state(controlState, "control")
 
 # agent alive state
@@ -481,7 +481,8 @@ if load_model_weights:
 
 if load_replay_buffer:
     sac.load_replay_buffer(result_file_path, load_epoch)
-    
+
+"""
 def randomise_rewards():
     # 1. Distance reward
     moveDistanceReward.reward_scale = random.choice([0.0, 1.0])
@@ -519,6 +520,51 @@ def randomise_rewards():
     controlState.state[7] = space_t
     controlState.state[9] = flow_t
     
+    return w
+"""
+
+def randomise_rewards():
+    
+    # 1. Handle Control State Values
+    # 1.1. Toggles for baseline behaviors
+    moveDistanceReward.reward_scale = random.choice([0.0, 1.0])
+    controlState.state[0] = moveDistanceReward.reward_scale
+
+    moveToTargetReward.approach_scale = random.choice([0.0, 1.0])
+    controlState.state[1] = moveToTargetReward.approach_scale
+
+    # 1.2. Assign Target values for Laban efforts
+    weight_t = random.choice([0.0, 1.0])
+    time_t = random.choice([0.0, 1.0])
+    space_t = random.choice([0.0, 1.0])
+    flow_t = random.choice([0.0, 1.0])
+
+    weightEffortReward.target_value = weight_t
+    timeEffortReward.target_value = time_t
+    spaceEffortReward.target_value = space_t
+    flowEffortReward.target_value = flow_t
+
+    # 1.3. Write targets directly to new controlState indices
+    controlState.state[2] = weight_t
+    controlState.state[3] = time_t
+    controlState.state[4] = space_t
+    controlState.state[5] = flow_t
+
+    # 2. Handle Preference Weights (w) exclusively for the SAC agent
+    num_objectives = len(env.rewards)
+    roll = random.random()
+    if roll < 0.5:
+        w = np.zeros(num_objectives, dtype=np.float32)
+        w[random.randint(0, num_objectives - 1)] = 1.0
+    elif roll < 0.8:
+        w = np.zeros(num_objectives, dtype=np.float32)
+        active_indices = random.sample(range(num_objectives), random.randint(2, 3))
+        for idx in active_indices:
+            w[idx] = random.uniform(0.1, 1.0)
+        w = w / np.sum(w)
+    else:
+        w = np.random.dirichlet(np.full(num_objectives, 0.1)).astype(np.float32)
+
     return w
 
 # output gym render frames as gif
@@ -676,7 +722,7 @@ def train_agent(epochs, steps_per_epoch, render):
 
             current_target_pos = target.body.get_position()
             new_x = current_target_pos[0] + target_velocity[0]
-            new_y = current_current_target_pos[1] + target_velocity[1]
+            new_y = current_target_pos[1] + target_velocity[1]
 
             if np.linalg.norm([new_x, new_y]) > target_max_center_dist:
                 target_velocity = -target_velocity 

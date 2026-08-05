@@ -1,5 +1,5 @@
 """
-this goes along with sac_control_train_v2.py
+this goes along with sac_control_train_v3.py
 """
 
 import sys
@@ -33,6 +33,7 @@ from custom.states.agent_states.body_target_state import BodyTargetState
 
 # import alive states
 from custom.states.alive_states.ground_contact_state import GroundContactState as GroundContactAliveState
+from custom.states.alive_states.max_velocity_state import MaxVelocityState as MaxVelocityState
 
 # import rewards
 from custom.rewards.alive_reward import AliveReward
@@ -96,11 +97,11 @@ agent_alive_reward_scale = 1.0
 agent_joint_comfort_rotation_range = 0.7
 agent_joint_comfort_force_range = 5000
 agent_joint_max_force = 10000.0
-agent_joint_torque_cost = -0.5 # costs for applying torque to joint (exhaustion)
-agent_joint_limit_cost = -0.2 # costs for joint rotation close to limit (comfort)
-agent_joint_rotation_cost = -0.02 # costs for joint rotation outside of preferred range (comfort)
-agent_joint_force_cost = -0.02 # costs for forces applied to joints along their fixed digrees of freedom (comfort)
-agent_joint_reward_scale = 0.0 # 1.0
+agent_joint_torque_cost = -0.5 
+agent_joint_limit_cost = -0.2 
+agent_joint_rotation_cost = -0.02 
+agent_joint_force_cost = -0.02 
+agent_joint_reward_scale = 0.0 
 
 # feet with body collision
 agent_feet_collision_cost = -1.0
@@ -151,19 +152,10 @@ sac_hidden_sizes=(256, 256, 256)
 sac_activation=nn.ReLU
 
 """
-configuration: training
+configuration: training/testing shared
 """
 
-epochs=500
-steps_per_epoch=5000
-start_steps=5000 # number of initial steps when actions are taken randomly rather than from sac model
-update_after=1000 # update step after which training of the sac model starts 
-update_every=50 # once training started, number of steps after which training of model is repeated
-max_ep_len=800 # Maximum length of trajectory / episode / rollout.
-
-"""
-configuration: visualization
-"""
+max_ep_len=800 
 render = True
 
 """
@@ -346,12 +338,12 @@ agent.add_state(bodyVelState, "bodyVel")
 bodyTargetState = BodyTargetState()
 agent.add_state(bodyTargetState, "bodyTarget")
 
-# external control state with following content
-# 0: dist weight
-# 1: move to target weight
-# 2 - 10: effort weight, effort taget value
+# external control state - UPDATED TO 6 TO MATCH TRAINING
+# 0: move_dist weight scale toggle
+# 1: move_to_target weight scale toggle
+# 2 - 5: effort target values (weight, time, space, flow)
 controlState = CustomState()
-controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+controlState.state = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
 agent.add_state(controlState, "control")
 
 # agent alive state
@@ -362,10 +354,15 @@ aliveState.feet_names = agent_feet_names
 agent.add_alive_state(aliveState, "alive")
 """
 
+# agent stops being alive when its root link moves too fast - RESTORED TO MATCH TRAINING
+aliveState2 = MaxVelocityState()
+aliveState2.max_linear_speed = 50.0  # Increased for stability
+aliveState2.max_angular_speed = 200.0 # Increased for stability
+agent.add_alive_state(aliveState2, "alive2")
+
 # specify rewards
 
 # rewards for training environment
-
 aliveReward = AliveReward()
 aliveReward.alive_value = agent_alive_cost
 aliveReward.not_alive_value = agent_not_alive_cost
@@ -398,8 +395,8 @@ moveDistanceReward = MoveDistanceReward()
 moveDistanceReward.reward_scale  = agent_move_distance_reward_scale
 
 moveToTargetReward = MoveToTargetReward()
-moveDistanceReward.approach_scale = agent_move_to_target_reward_scale
-moveDistanceReward.stillness_scale = agent_stay_at_target_reward_scale
+moveToTargetReward.approach_scale = agent_move_to_target_reward_scale # FIXED TYPO HERE
+moveToTargetReward.stillness_scale = agent_stay_at_target_reward_scale # FIXED TYPO HERE
 
 weightEffortReward = WeightEffortReward()
 weightEffortReward.reward_scale = agent_weight_effort_reward_scale
@@ -469,14 +466,12 @@ if load_replay_buffer:
     sac.load_replay_buffer(result_file_path, load_epoch)
     
 def randomise_rewards():
-    # Set scales explicitly to 1.0 since w handles the weighting dynamically
-    moveDistanceReward.reward_scale = 1.0
-    moveToTargetReward.approach_scale = 1.0
+    # 1. Handle Control State Values exactly as they are in train script
+    moveDistanceReward.reward_scale = random.choice([0.0, 1.0])
+    controlState.state[0] = moveDistanceReward.reward_scale
 
-    num_objectives = len(env.rewards)
-
-    # Sample random preferences for testing (or hardcode to test specific styles)
-    w = np.random.dirichlet(np.ones(num_objectives)).astype(np.float32)
+    moveToTargetReward.approach_scale = random.choice([0.0, 1.0])
+    controlState.state[1] = moveToTargetReward.approach_scale
 
     weight_t = random.choice([0.0, 1.0])
     time_t = random.choice([0.0, 1.0])
@@ -488,21 +483,23 @@ def randomise_rewards():
     spaceEffortReward.target_value = space_t
     flowEffortReward.target_value = flow_t
 
-    # Overwrite controlState targets (w is passed directly to agent, targets are in observation)
-    controlState.state[3] = weight_t
-    controlState.state[5] = time_t
-    controlState.state[7] = space_t
-    controlState.state[9] = flow_t
+    # Write targets directly to aligned controlState indices
+    controlState.state[2] = weight_t
+    controlState.state[3] = time_t
+    controlState.state[4] = space_t
+    controlState.state[5] = flow_t
+
+    # 2. Sample continuous preference weights for the objectives (Dirichlet distribution)
+    # Testing can use purely random Dirichlet, or you can hardcode this if you want to test specific efforts
+    num_objectives = len(env.rewards)
+    w = np.random.dirichlet(np.ones(num_objectives)).astype(np.float32)
 
     return w
 
 # output gym render frames as gif
 def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
 
-    #Mess with this to change frame size
     plt.figure(figsize=(frames[0].shape[1] / 72.0, frames[0].shape[0] / 72.0), dpi=72)
-    #plt.figure(figsize=(frames[0].shape[1] / 18.0, frames[0].shape[0] / 18.0 ), dpi=72)
-
     patch = plt.imshow(frames[0])
     plt.axis('off')
 
@@ -515,10 +512,7 @@ def save_frames_as_gif(frames, path='./', filename='gym_animation.gif'):
 # output pillow images as gif
 def save_images_as_gif(images, path='./', filename='gym_animation.gif'):
 
-    #Mess with this to change frame size
     plt.figure(figsize=(images[0].width / 72.0, images[0].height / 72.0), dpi=72)
-    #plt.figure(figsize=(frames[0].shape[1] / 18.0, frames[0].shape[0] / 18.0 ), dpi=72)
-
     patch = plt.imshow(images[0])
     plt.axis('off')
 
@@ -566,7 +560,11 @@ def export_episode(env, sim_file, reward_file, value_file):
         for reward, reward_name in zip(env.rewards, env.reward_names):
             episode_rewards[reward_name].append(reward.reward)
             episode_values[reward_name].append(reward.value)
-            episode_values_orig[reward_name].append(reward.orig_value)
+            # Make sure all reward scripts actually have orig_value initialized for this to work
+            if hasattr(reward, 'orig_value'):
+                episode_values_orig[reward_name].append(reward.orig_value)
+            else:
+                episode_values_orig[reward_name].append(reward.value)
 
         # Update target position continuously
         if base_target_speed > 0:
